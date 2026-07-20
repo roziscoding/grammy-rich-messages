@@ -1,0 +1,83 @@
+import { Bot } from 'grammy'
+import process from 'node:process'
+import { richMessages, type RichMessagesFlavor } from 'telegram-rich-messages'
+import { Bold, Divider, Paragraph, RichMessage, Table, TableCell, TableRow } from 'telegram-rich-messages/components'
+import { RichMessage as RichMessageBuilder } from 'telegram-rich-messages/fluent'
+import { bold, paragraph, richMessage, table, tableCell, tableRow } from 'telegram-rich-messages/core'
+
+const bot = new Bot<RichMessagesFlavor>(process.env.TELEGRAM_TOKEN!)
+
+bot.use(richMessages)
+
+bot.command('components', (ctx) => {
+    const message = <>
+        <RichMessage>
+            <Paragraph>
+                Hello, <Bold>{ctx.message?.from.first_name ?? 'there'}!</Bold>
+            </Paragraph>
+            <Paragraph>
+                Here's a table:
+            </Paragraph>
+            <Divider />
+            <Table>
+                <TableRow>
+                    <TableCell header>Name</TableCell>
+                    <TableCell header>Last Name</TableCell>
+                    <TableCell header>Age</TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>John</TableCell>
+                    <TableCell>Doe</TableCell>
+                    <TableCell>42</TableCell>
+                </TableRow>
+            </Table>
+        </RichMessage>
+    </>
+
+    return ctx.replyRich(message)
+})
+
+bot.command('fluent', ctx => {
+    const message = new RichMessageBuilder()
+        .paragraph("Hello, ", bold(ctx.message?.from.first_name ?? 'there'), "!")
+        .paragraph("Here's a table:")
+        .table((t) => t
+            .row((r) => r
+                .cell("Name", { header: true })
+                .cell("Last Name", { header: true })
+                .cell("Age", { header: true })
+            )
+            .row((r) => r.
+                cell("John")
+                .cell("Doe")
+                .cell("42")
+            )
+        )
+
+    return ctx.replyRich(message)
+})
+
+bot.command("core", ctx => {
+    const message = richMessage(
+        paragraph(`Hello, `, bold(ctx.message?.from.first_name ?? 'there'), '!'),
+        paragraph("Here's a table:"),
+        table(
+            tableRow(
+                tableCell({ header: true }, "Name"),
+                tableCell({ header: true }, "Last Name"),
+                tableCell({ header: true }, "Age")
+            ),
+            tableRow(
+                tableCell("John"),
+                tableCell("Doe"),
+                tableCell("42")
+            )
+        )
+    )
+
+    return ctx.replyRich(message)
+})
+
+bot.start({
+    onStart: ({ username }) => { console.log(`Listening as @${username}`) }
+})
