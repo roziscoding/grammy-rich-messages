@@ -5,25 +5,25 @@ import type {
   RichTextCashtag,
   RichTextDateTime,
   RichTextEmailAddress,
-  RichTextEntity,
   RichTextHashtag,
   RichTextMention,
-  RichTextNested,
   RichTextPhoneNumber,
   RichTextReference,
   RichTextReferenceLink,
+  RichText,
   RichTextTextMention,
   RichTextUrl,
-} from "../types.js";
-import { brand, type RichTextValue } from "../values.js";
-import { assertNoChildren, richText, type RichTextInput } from "./shared.js";
+  User,
+} from "../deps";
+import { brand, type RichTextValue } from "../core/values";
+import { assertNoChildren, richText, type RichTextInput } from "./shared";
 
-export type { RichTextInput } from "./shared.js";
+export type { RichTextInput } from "./shared";
 
-type NestedKind = RichTextNested["type"];
+type NestedKind = "bold" | "italic" | "underline" | "strikethrough" | "spoiler" | "subscript" | "superscript" | "marked" | "code";
 
-function nested<K extends NestedKind>(type: K, context: string, children: readonly RichTextInput[]): RichTextValue<RichTextNested & { type: K }> {
-  return brand({ type, text: richText(children, context) }, "rich-text");
+function nested<K extends NestedKind>(type: K, context: string, children: readonly RichTextInput[]): RichTextValue<Extract<RichText, { type: K }>> {
+  return brand({ type, text: richText(children, context) }, "rich-text") as RichTextValue<Extract<RichText, { type: K }>>;
 }
 
 export function bold(...children: readonly RichTextInput[]) { return nested("bold", "bold()", children); }
@@ -36,11 +36,11 @@ export function superscript(...children: readonly RichTextInput[]) { return nest
 export function marked(...children: readonly RichTextInput[]) { return nested("marked", "marked()", children); }
 export function code(...children: readonly RichTextInput[]) { return nested("code", "code()", children); }
 
-function entity<T extends RichTextEntity>(value: T): RichTextValue<T> {
+function entity<T extends Extract<RichText, { type: string }>>(value: T): RichTextValue<T> {
   return brand(value, "rich-text");
 }
 
-export interface DateTimeOptions { unixTime: number; format: string; }
+export interface DateTimeOptions { unixTime: number; format: RichTextDateTime["date_time_format"]; }
 export function dateTime(options: DateTimeOptions, ...children: readonly RichTextInput[]): RichTextValue<RichTextDateTime> {
   return entity({
     type: "date_time",
@@ -50,7 +50,7 @@ export function dateTime(options: DateTimeOptions, ...children: readonly RichTex
   });
 }
 
-export interface TextMentionOptions { user: Record<string, unknown>; }
+export interface TextMentionOptions { user: User; }
 export function textMention(options: TextMentionOptions, ...children: readonly RichTextInput[]): RichTextValue<RichTextTextMention> {
   return entity({ type: "text_mention", text: richText(children, "textMention()"), user: options.user });
 }
@@ -67,7 +67,7 @@ export function inlineMath(options: InlineMathOptions, ...children: readonly nev
   return entity({ type: "mathematical_expression", expression: options.expression });
 }
 
-function textEntity<T extends RichTextEntity>(value: object, context: string, children: readonly RichTextInput[]): RichTextValue<T> {
+function textEntity<T extends Extract<RichText, { type: string }>>(value: object, context: string, children: readonly RichTextInput[]): RichTextValue<T> {
   return entity({ ...value, text: richText(children, context) } as T);
 }
 

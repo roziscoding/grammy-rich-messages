@@ -28,7 +28,7 @@ import {
   TextMention,
   Underline,
   expectRichMessage,
-} from "../src/jsx.js";
+} from "../src/components";
 
 describe("expectRichMessage", () => {
   test("composes text blocks and nested rich text from TSX", () => {
@@ -55,7 +55,7 @@ describe("expectRichMessage", () => {
       <RichMessage>
         <Paragraph>
           <Italic>i</Italic><Underline>u</Underline><Strikethrough>s</Strikethrough>
-          <Spoiler>secret</Spoiler><DateTime unixTime={0} format="dd MMM yyyy">epoch</DateTime>
+          <Spoiler>secret</Spoiler><DateTime unixTime={0} format="wDt">epoch</DateTime>
           <TextMention user={user}>Ada</TextMention><Subscript>2</Subscript><Superscript>3</Superscript>
           <Marked>mark</Marked><Code>code</Code><CustomEmoji id="emoji-id" alt="✨" />
           <InlineMath expression="x^2" /><Link url="https://telegram.org">link</Link>
@@ -69,14 +69,14 @@ describe("expectRichMessage", () => {
       </RichMessage>,
     );
 
-    const first = output.blocks[0];
+    const first = output.blocks![0];
     expect(first?.type).toBe("paragraph");
     if (!first || first.type !== "paragraph") throw new Error("expected paragraph output");
 
     expect(first.text).toEqual([
       { type: "italic", text: "i" }, { type: "underline", text: "u" },
       { type: "strikethrough", text: "s" }, { type: "spoiler", text: "secret" },
-      { type: "date_time", text: "epoch", unix_time: 0, date_time_format: "dd MMM yyyy" },
+      { type: "date_time", text: "epoch", unix_time: 0, date_time_format: "wDt" },
       { type: "text_mention", text: "Ada", user }, { type: "subscript", text: "2" },
       { type: "superscript", text: "3" }, { type: "marked", text: "mark" },
       { type: "code", text: "code" },

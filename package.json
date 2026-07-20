@@ -9,21 +9,21 @@
       "types": "./dist/core.d.ts",
       "import": "./dist/core.js"
     },
-    "./jsx": {
-      "types": "./dist/jsx.d.ts",
-      "import": "./dist/jsx.js"
+    "./components": {
+      "types": "./dist/components.d.ts",
+      "import": "./dist/components.js"
     },
-    "./builder": {
-      "types": "./dist/builder.d.ts",
-      "import": "./dist/builder.js"
+    "./fluent": {
+      "types": "./dist/fluent.d.ts",
+      "import": "./dist/fluent.js"
     },
     "./jsx/jsx-runtime": {
-      "types": "./dist/jsx-runtime.d.ts",
-      "import": "./dist/jsx-runtime.js"
+      "types": "./dist/components/jsx-runtime.d.ts",
+      "import": "./dist/components/jsx-runtime.js"
     },
     "./jsx/jsx-dev-runtime": {
-      "types": "./dist/jsx-dev-runtime.d.ts",
-      "import": "./dist/jsx-dev-runtime.js"
+      "types": "./dist/components/jsx-runtime.d.ts",
+      "import": "./dist/components/jsx-runtime.js"
     }
   },
   "files": ["dist"],
@@ -45,5 +45,8 @@
   "homepage": "https://github.com/roziscoding/telegram-rich-messages#readme",
   "bugs": {
     "url": "https://github.com/roziscoding/telegram-rich-messages/issues"
+  },
+  "dependencies": {
+    "@grammyjs/types": "4.0.0"
   }
 }

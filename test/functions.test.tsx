@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import * as rm from "../src/core.js";
+import * as rm from "../src/core";
 import {
   bold,
   italic,
@@ -7,14 +7,14 @@ import {
   table,
   tableCell,
   tableRow,
-} from "../src/core.js";
+} from "../src/core";
 import {
   Bold,
   Paragraph,
   Table,
   expectRichMessage,
-} from "../src/jsx.js";
-import * as components from "../src/jsx.js";
+} from "../src/components";
+import * as components from "../src/components";
 
 test("functional builders return canonical Telegram values without rendering", () => {
   const formatted = bold("some", italic("text"), "here");
@@ -92,7 +92,7 @@ test("JSX nodes can enter strict functional composition through runtime narrowin
     ),
   );
 
-  expect(message.blocks[0]).toEqual({
+  expect(message.blocks![0]).toEqual({
     type: "table",
     cells: [[{ text: { type: "bold", text: "hybrid" }, align: "left", valign: "top" }]],
   });
@@ -118,7 +118,7 @@ test("functional rich-text builders cover every entity", () => {
   const user = { id: 42, is_bot: false, first_name: "Ada" };
   const message = rm.richMessage(rm.paragraph(
     rm.italic("i"), rm.underline("u"), rm.strikethrough("s"), rm.spoiler("secret"),
-    rm.dateTime({ unixTime: 0, format: "dd MMM yyyy" }, "epoch"),
+    rm.dateTime({ unixTime: 0, format: "wDt" }, "epoch"),
     rm.textMention({ user }, "Ada"), rm.subscript("2"), rm.superscript("3"),
     rm.marked("mark"), rm.code("code"), rm.customEmoji({ id: "emoji-id", alt: "✨" }),
     rm.inlineMath({ expression: "x^2" }), rm.link({ url: "https://telegram.org" }, "link"),
@@ -130,12 +130,12 @@ test("functional rich-text builders cover every entity", () => {
     rm.referenceLink({ name: "note" }, "[1]"),
   ));
 
-  const first = message.blocks[0];
+  const first = message.blocks![0];
   if (!first || first.type !== "paragraph" || !Array.isArray(first.text)) {
     throw new Error("expected functional rich-text output");
   }
   expect(first.text
-    .filter((part): part is rm.RichTextEntity => typeof part === "object" && !Array.isArray(part))
+    .filter((part): part is Extract<rm.RichText, { type: string }> => typeof part === "object" && !Array.isArray(part))
     .map((part) => part.type)).toEqual([
     "italic", "underline", "strikethrough", "spoiler", "date_time", "text_mention",
     "subscript", "superscript", "marked", "code", "custom_emoji", "mathematical_expression",
@@ -167,7 +167,7 @@ test("functional block builders cover every block variant", () => {
   );
 
   expect(output.is_rtl).toBe(true);
-  expect(output.blocks.map((block) => block.type)).toEqual([
+  expect(output.blocks!.map((block) => block.type)).toEqual([
     "heading", "pre", "footer", "divider", "mathematical_expression", "anchor", "list",
     "blockquote", "pullquote", "collage", "slideshow", "table", "details", "map",
     "animation", "audio", "photo", "video", "voice_note", "thinking",

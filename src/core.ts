@@ -1,12 +1,13 @@
-export * from "./functions/blocks.js";
-export * from "./functions/message.js";
-export * from "./functions/text.js";
+export * from "./core/blocks";
+export * from "./core/message";
+export * from "./core/text";
 export type {
   BlockValue,
+  BlockValueOf,
   ListItemValue,
   RichMessageValue,
   RichTextValue,
   TableCellValue,
   TableRowValue,
-} from "./values.js";
-export type * from "./types.js";
+} from "./core/values";
+export type * from "./deps";

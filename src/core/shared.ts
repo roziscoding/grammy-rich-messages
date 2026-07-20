@@ -1,10 +1,10 @@
-import type { RichBlockCaption, RichText } from "../types.js";
-import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../values.js";
+import type { RichBlockCaption, RichText } from "../deps";
+import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values";
 
 export type OptionalNested<T> = T | boolean | null | undefined | readonly OptionalNested<T>[];
 export type RichTextInput = OptionalNested<string | number | RichTextValue>;
-export type BlockInput = OptionalNested<BlockValue>;
-export type ListItemInput = OptionalNested<ListItemValue>;
+export type BlockInput<F = string> = OptionalNested<BlockValue<F>>;
+export type ListItemInput<F = string> = OptionalNested<ListItemValue<F>>;
 export type TableCellInput = OptionalNested<TableCellValue>;
 export type TableRowInput = OptionalNested<TableRowValue>;
 
@@ -51,20 +51,20 @@ function collectBranded<T>(values: readonly unknown[], kind: string, context: st
   return result;
 }
 
-export function blocks(values: readonly unknown[], context: string): BlockValue[] {
+export function blocks<F = string>(values: readonly unknown[], context: string): BlockValue<F>[] {
   if (context === "richMessage()") {
-    const result: BlockValue[] = [];
+    const result: BlockValue<F>[] = [];
     for (const item of flattenInputs(values)) {
       if (item == null || typeof item === "boolean") continue;
       if (kindOf(item) !== "block") throw new TypeError("richMessage() only accepts rich-message blocks");
-      result.push(item as BlockValue);
+      result.push(item as BlockValue<F>);
     }
     return result;
   }
-  return collectBranded<BlockValue>(values, "block", context);
+  return collectBranded<BlockValue<F>>(values, "block", context);
 }
-export function listItems(values: readonly unknown[], context: string): ListItemValue[] {
-  return collectBranded<ListItemValue>(values, "list-item", context);
+export function listItems<F = string>(values: readonly unknown[], context: string): ListItemValue<F>[] {
+  return collectBranded<ListItemValue<F>>(values, "list-item", context);
 }
 export function tableRows(values: readonly unknown[], context: string): TableRowValue[] {
   return collectBranded<TableRowValue>(values, "table-row", context);

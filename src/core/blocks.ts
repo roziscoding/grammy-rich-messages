@@ -5,11 +5,11 @@ import type {
   InputMediaVideo,
   InputMediaVoiceNote,
   InputRichBlock,
+  InputRichBlockListItem,
   Location,
-  RichBlockListItem,
   RichBlockTableCell,
-} from "../types.js";
-import { brand, type BlockValue, type ListItemValue, type TableCellValue, type TableRowValue } from "../values.js";
+} from "../deps";
+import { brand, type BlockValue, type BlockValueOf, type ListItemValue, type TableCellValue, type TableRowValue } from "../core/values";
 import {
   assertNoChildren,
   blocks,
@@ -24,15 +24,15 @@ import {
   type RichTextInput,
   type TableCellInput,
   type TableRowInput,
-} from "./shared.js";
+} from "./shared";
 
-export type { BlockInput, ListItemInput, TableCellInput, TableRowInput } from "./shared.js";
+export type { BlockInput, ListItemInput, TableCellInput, TableRowInput } from "./shared";
 
 export type CaptionOptions =
   | { caption: RichTextInput; credit?: RichTextInput }
   | { caption?: undefined; credit?: never };
 
-function block<T extends InputRichBlock>(value: T): BlockValue<T> {
+function block<T extends InputRichBlock<unknown>>(value: T) {
   return brand(value, "block");
 }
 
@@ -40,8 +40,8 @@ function richTextBlock<T extends "paragraph" | "footer" | "thinking">(
   type: T,
   context: string,
   children: readonly RichTextInput[],
-): BlockValue<Extract<InputRichBlock, { type: T }>> {
-  return block({ type, text: richText(children, context) } as Extract<InputRichBlock, { type: T }>);
+): BlockValueOf<T> {
+  return block({ type, text: richText(children, context) } as Extract<InputRichBlock<never>, { type: T }>);
 }
 
 export function paragraph(...children: readonly RichTextInput[]) { return richTextBlock("paragraph", "paragraph()", children); }
@@ -54,8 +54,8 @@ export function heading(options: HeadingOptions, ...children: readonly RichTextI
 }
 
 export interface PreOptions { language?: string; }
-export function pre(...children: readonly RichTextInput[]): BlockValue<Extract<InputRichBlock, { type: "pre" }>>;
-export function pre(options: PreOptions, ...children: readonly RichTextInput[]): BlockValue<Extract<InputRichBlock, { type: "pre" }>>;
+export function pre(...children: readonly RichTextInput[]): BlockValueOf<"pre">;
+export function pre(options: PreOptions, ...children: readonly RichTextInput[]): BlockValueOf<"pre">;
 export function pre(first?: PreOptions | RichTextInput, ...rest: readonly RichTextInput[]) {
   const [options, children] = splitOptions<PreOptions, RichTextInput>(first, rest, "pre()", ["language"], "rich-text", true);
   return block({ type: "pre", text: richText(children, "pre()"), ...(options?.language === undefined ? {} : { language: options.language }) });
@@ -76,8 +76,8 @@ export function blockAnchor(options: BlockAnchorOptions, ...children: readonly n
   return block({ type: "anchor", name: options.name });
 }
 
-export function list(...items: readonly ListItemInput[]) {
-  return block({ type: "list", items: listItems(items, "list()") });
+export function list<F = string>(...items: readonly ListItemInput<F>[]): BlockValueOf<"list", F> {
+  return block({ type: "list", items: listItems<F>(items, "list()") } as Extract<InputRichBlock<F>, { type: "list" }>);
 }
 
 export type ListItemOptions = (
@@ -85,17 +85,17 @@ export type ListItemOptions = (
   | { checkbox?: false; checked?: never }
 ) & { value?: number; labelType?: "a" | "A" | "i" | "I" | "1" };
 
-export function listItem(...children: readonly BlockInput[]): ListItemValue;
-export function listItem(options: ListItemOptions, ...children: readonly BlockInput[]): ListItemValue;
-export function listItem(first?: ListItemOptions | BlockInput, ...rest: readonly BlockInput[]) {
-  const [options = {}, children] = splitOptions<ListItemOptions, BlockInput>(
+export function listItem<F = string>(...children: readonly BlockInput<F>[]): ListItemValue<F>;
+export function listItem<F = string>(options: ListItemOptions, ...children: readonly BlockInput<F>[]): ListItemValue<F>;
+export function listItem<F = string>(first?: ListItemOptions | BlockInput<F>, ...rest: readonly BlockInput<F>[]) {
+  const [options = {}, children] = splitOptions<ListItemOptions, BlockInput<F>>(
     first, rest, "listItem()", ["checkbox", "checked", "value", "labelType"], "block",
   );
   if ((options as { checked?: unknown }).checked === true && (options as { checkbox?: unknown }).checkbox !== true) {
     throw new TypeError("listItem() checked requires checkbox");
   }
-  const value: RichBlockListItem = {
-    blocks: blocks(children, "listItem()"),
+  const value: InputRichBlockListItem<F> = {
+    blocks: blocks<F>(children, "listItem()"),
     ...(options.value === undefined ? {} : { value: options.value }),
     ...(options.labelType === undefined ? {} : { type: options.labelType }),
     ...(options.checkbox === true ? { has_checkbox: true as const, ...(options.checked === true ? { is_checked: true as const } : {}) } : {}),
@@ -104,20 +104,20 @@ export function listItem(first?: ListItemOptions | BlockInput, ...rest: readonly
 }
 
 export interface BlockQuoteOptions { credit?: RichTextInput; }
-export function blockQuote(...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "blockquote" }>>;
-export function blockQuote(options: BlockQuoteOptions, ...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "blockquote" }>>;
-export function blockQuote(first?: BlockQuoteOptions | BlockInput, ...rest: readonly BlockInput[]) {
-  const [options = {}, children] = splitOptions<BlockQuoteOptions, BlockInput>(first, rest, "blockQuote()", ["credit"], "block");
+export function blockQuote<F = string>(...children: readonly BlockInput<F>[]): BlockValueOf<"blockquote", F>;
+export function blockQuote<F = string>(options: BlockQuoteOptions, ...children: readonly BlockInput<F>[]): BlockValueOf<"blockquote", F>;
+export function blockQuote<F = string>(first?: BlockQuoteOptions | BlockInput<F>, ...rest: readonly BlockInput<F>[]) {
+  const [options = {}, children] = splitOptions<BlockQuoteOptions, BlockInput<F>>(first, rest, "blockQuote()", ["credit"], "block");
   return block({
     type: "blockquote",
-    blocks: blocks(children, "blockQuote()"),
+    blocks: blocks<F>(children, "blockQuote()"),
     ...(options.credit === undefined ? {} : { credit: richText([options.credit], "blockQuote() credit") }),
-  });
+  } as Extract<InputRichBlock<F>, { type: "blockquote" }>);
 }
 
 export interface PullQuoteOptions { credit?: RichTextInput; }
-export function pullQuote(...children: readonly RichTextInput[]): BlockValue<Extract<InputRichBlock, { type: "pullquote" }>>;
-export function pullQuote(options: PullQuoteOptions, ...children: readonly RichTextInput[]): BlockValue<Extract<InputRichBlock, { type: "pullquote" }>>;
+export function pullQuote(...children: readonly RichTextInput[]): BlockValueOf<"pullquote">;
+export function pullQuote(options: PullQuoteOptions, ...children: readonly RichTextInput[]): BlockValueOf<"pullquote">;
 export function pullQuote(first?: PullQuoteOptions | RichTextInput, ...rest: readonly RichTextInput[]) {
   const [options = {}, children] = splitOptions<PullQuoteOptions, RichTextInput>(first, rest, "pullQuote()", ["credit"], "rich-text", true);
   return block({
@@ -127,31 +127,31 @@ export function pullQuote(first?: PullQuoteOptions | RichTextInput, ...rest: rea
   });
 }
 
-function collection<T extends "collage" | "slideshow">(
+function collection<F, T extends "collage" | "slideshow">(
   type: T,
   context: string,
   options: CaptionOptions,
-  children: readonly BlockInput[],
-): BlockValue<Extract<InputRichBlock, { type: T }>> {
+  children: readonly BlockInput<F>[],
+): BlockValueOf<T, F> {
   const richCaption = caption(options, context);
-  return block({ type, blocks: blocks(children, context), ...(richCaption === undefined ? {} : { caption: richCaption }) } as Extract<InputRichBlock, { type: T }>);
+  return block({ type, blocks: blocks<F>(children, context), ...(richCaption === undefined ? {} : { caption: richCaption }) } as Extract<InputRichBlock<F>, { type: T }>);
 }
-export function collage(...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "collage" }>>;
-export function collage(options: CaptionOptions, ...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "collage" }>>;
-export function collage(first?: CaptionOptions | BlockInput, ...rest: readonly BlockInput[]) {
-  const [options = {}, children] = splitOptions<CaptionOptions, BlockInput>(first, rest, "collage()", ["caption", "credit"], "block");
-  return collection("collage", "collage()", options, children);
+export function collage<F = string>(...children: readonly BlockInput<F>[]): BlockValueOf<"collage", F>;
+export function collage<F = string>(options: CaptionOptions, ...children: readonly BlockInput<F>[]): BlockValueOf<"collage", F>;
+export function collage<F = string>(first?: CaptionOptions | BlockInput<F>, ...rest: readonly BlockInput<F>[]) {
+  const [options = {}, children] = splitOptions<CaptionOptions, BlockInput<F>>(first, rest, "collage()", ["caption", "credit"], "block");
+  return collection<F, "collage">("collage", "collage()", options, children);
 }
-export function slideshow(...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "slideshow" }>>;
-export function slideshow(options: CaptionOptions, ...children: readonly BlockInput[]): BlockValue<Extract<InputRichBlock, { type: "slideshow" }>>;
-export function slideshow(first?: CaptionOptions | BlockInput, ...rest: readonly BlockInput[]) {
-  const [options = {}, children] = splitOptions<CaptionOptions, BlockInput>(first, rest, "slideshow()", ["caption", "credit"], "block");
-  return collection("slideshow", "slideshow()", options, children);
+export function slideshow<F = string>(...children: readonly BlockInput<F>[]): BlockValueOf<"slideshow", F>;
+export function slideshow<F = string>(options: CaptionOptions, ...children: readonly BlockInput<F>[]): BlockValueOf<"slideshow", F>;
+export function slideshow<F = string>(first?: CaptionOptions | BlockInput<F>, ...rest: readonly BlockInput<F>[]) {
+  const [options = {}, children] = splitOptions<CaptionOptions, BlockInput<F>>(first, rest, "slideshow()", ["caption", "credit"], "block");
+  return collection<F, "slideshow">("slideshow", "slideshow()", options, children);
 }
 
 export interface TableOptions { bordered?: boolean; striped?: boolean; caption?: RichTextInput; }
-export function table(...rows: readonly TableRowInput[]): BlockValue<Extract<InputRichBlock, { type: "table" }>>;
-export function table(options: TableOptions, ...rows: readonly TableRowInput[]): BlockValue<Extract<InputRichBlock, { type: "table" }>>;
+export function table(...rows: readonly TableRowInput[]): BlockValueOf<"table">;
+export function table(options: TableOptions, ...rows: readonly TableRowInput[]): BlockValueOf<"table">;
 export function table(first?: TableOptions | TableRowInput, ...rest: readonly TableRowInput[]) {
   const [options = {}, children] = splitOptions<TableOptions, TableRowInput>(first, rest, "table()", ["bordered", "striped", "caption"], "table-row");
   return block({
@@ -160,7 +160,7 @@ export function table(first?: TableOptions | TableRowInput, ...rest: readonly Ta
     ...(options.bordered === true ? { is_bordered: true as const } : {}),
     ...(options.striped === true ? { is_striped: true as const } : {}),
     ...(options.caption === undefined ? {} : { caption: richText([options.caption], "table() caption") }),
-  });
+  } as Extract<InputRichBlock<never>, { type: "table" }>);
 }
 
 export function tableRow(...children: readonly TableCellInput[]): TableRowValue {
@@ -192,17 +192,17 @@ export function tableCell(first?: TableCellOptions | RichTextInput, ...rest: rea
 }
 
 export interface DetailsOptions { summary: RichTextInput; open?: boolean; }
-export function details(options: DetailsOptions, ...children: readonly BlockInput[]) {
+export function details<F = string>(options: DetailsOptions, ...children: readonly BlockInput<F>[]): BlockValueOf<"details", F> {
   return block({
     type: "details",
     summary: richText([options.summary], "details() summary"),
-    blocks: blocks(children, "details()"),
+    blocks: blocks<F>(children, "details()"),
     ...(options.open === true ? { is_open: true as const } : {}),
-  });
+  } as Extract<InputRichBlock<F>, { type: "details" }>);
 }
 
 export type MapOptions = CaptionOptions & { location: Location; zoom: number; width: number; height: number };
-export function map(options: MapOptions, ...children: readonly never[]) {
+export function map(options: MapOptions, ...children: readonly never[]): BlockValueOf<"map"> {
   assertNoChildren(children, "map()");
   const { zoom, width, height } = options;
   if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24) throw new RangeError("map() zoom must be an integer from 0 to 24");
@@ -213,23 +213,23 @@ export function map(options: MapOptions, ...children: readonly never[]) {
     throw new RangeError("map() width-to-height ratio must not exceed 20");
   }
   const richCaption = caption(options, "map()");
-  return block({ type: "map", location: options.location, zoom, width, height, ...(richCaption === undefined ? {} : { caption: richCaption }) });
+  return block({ type: "map", location: options.location, zoom, width, height, ...(richCaption === undefined ? {} : { caption: richCaption }) } as Extract<InputRichBlock<never>, { type: "map" }>);
 }
 
-export type AnimationOptions = { media: InputMediaAnimation } & CaptionOptions;
-export type AudioOptions = { media: InputMediaAudio } & CaptionOptions;
-export type PhotoOptions = { media: InputMediaPhoto } & CaptionOptions;
-export type VideoOptions = { media: InputMediaVideo } & CaptionOptions;
-export type VoiceNoteOptions = { media: InputMediaVoiceNote } & CaptionOptions;
+export type AnimationOptions<F = string> = { media: InputMediaAnimation<F> } & CaptionOptions;
+export type AudioOptions<F = string> = { media: InputMediaAudio<F> } & CaptionOptions;
+export type PhotoOptions<F = string> = { media: InputMediaPhoto<F> } & CaptionOptions;
+export type VideoOptions<F = string> = { media: InputMediaVideo<F> } & CaptionOptions;
+export type VoiceNoteOptions<F = string> = { media: InputMediaVoiceNote<F> } & CaptionOptions;
 
 type MediaBlockType = "animation" | "audio" | "photo" | "video" | "voice_note";
 
-function media<T extends MediaBlockType>(
+function media<F, T extends MediaBlockType>(
   type: T,
   context: string,
   options: CaptionOptions & { media: unknown },
   children: readonly never[],
-): BlockValue<Extract<InputRichBlock, { type: T }>> {
+): BlockValueOf<T, F> {
   assertNoChildren(children, context);
   const richCaption = caption(options, context);
   const mediaField = type === "voice_note" ? "voice_note" : type;
@@ -237,10 +237,10 @@ function media<T extends MediaBlockType>(
     type,
     [mediaField]: options.media,
     ...(richCaption === undefined ? {} : { caption: richCaption }),
-  } as Extract<InputRichBlock, { type: T }>);
+  } as Extract<InputRichBlock<F>, { type: T }>);
 }
-export function animation(options: AnimationOptions, ...children: readonly never[]) { return media("animation", "animation()", options, children); }
-export function audio(options: AudioOptions, ...children: readonly never[]) { return media("audio", "audio()", options, children); }
-export function photo(options: PhotoOptions, ...children: readonly never[]) { return media("photo", "photo()", options, children); }
-export function video(options: VideoOptions, ...children: readonly never[]) { return media("video", "video()", options, children); }
-export function voiceNote(options: VoiceNoteOptions, ...children: readonly never[]) { return media("voice_note", "voiceNote()", options, children); }
+export function animation<F = string>(options: AnimationOptions<F>, ...children: readonly never[]) { return media<F, "animation">("animation", "animation()", options, children); }
+export function audio<F = string>(options: AudioOptions<F>, ...children: readonly never[]) { return media<F, "audio">("audio", "audio()", options, children); }
+export function photo<F = string>(options: PhotoOptions<F>, ...children: readonly never[]) { return media<F, "photo">("photo", "photo()", options, children); }
+export function video<F = string>(options: VideoOptions<F>, ...children: readonly never[]) { return media<F, "video">("video", "video()", options, children); }
+export function voiceNote<F = string>(options: VoiceNoteOptions<F>, ...children: readonly never[]) { return media<F, "voice_note">("voice_note", "voiceNote()", options, children); }

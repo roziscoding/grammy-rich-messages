@@ -1,4 +1,4 @@
-import type { Child } from "../jsx-runtime.js";
+import type { Child } from "./jsx-runtime";
 import {
   anchorLink,
   bankCard,
@@ -25,9 +25,11 @@ import {
   textAnchor,
   textMention,
   underline,
+  type DateTimeOptions,
   type RichTextInput,
-} from "../functions/text.js";
-import type { ChildrenProps, NoChildrenProps } from "./shared.js";
+  type TextMentionOptions,
+} from "../core/text";
+import type { ChildrenProps, NoChildrenProps } from "./shared";
 
 function richChildren(children: Child): RichTextInput[] {
   return children === undefined ? [] : [children as RichTextInput];
@@ -47,10 +49,10 @@ export function Superscript({ children }: ChildrenProps) { return superscript(..
 export function Marked({ children }: ChildrenProps) { return marked(...richChildren(children)); }
 export function Code({ children }: ChildrenProps) { return code(...richChildren(children)); }
 
-export function DateTime({ children, ...options }: ChildrenProps & { unixTime: number; format: string }) {
+export function DateTime({ children, ...options }: ChildrenProps & DateTimeOptions) {
   return dateTime(options, ...richChildren(children));
 }
-export function TextMention({ children, ...options }: ChildrenProps & { user: Record<string, unknown> }) {
+export function TextMention({ children, ...options }: ChildrenProps & TextMentionOptions) {
   return textMention(options, ...richChildren(children));
 }
 export function CustomEmoji({ children, ...options }: { id: string; alt: string } & NoChildrenProps) {

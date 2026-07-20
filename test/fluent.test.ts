@@ -2,14 +2,14 @@ import { expect, test } from "bun:test";
 import {
   RichMessageBuilder,
   TableBuilder,
-} from "../src/builder.js";
+} from "../src/fluent";
 import {
   bold,
   paragraph,
   type InputRichBlockParagraph,
   type InputRichMessage,
   type RichBlockTableCell,
-} from "../src/core.js";
+} from "../src/core";
 
 const results = [
   { model: "Aster-1", score: 98.4 },
@@ -33,7 +33,7 @@ test("fluent builders accumulate canonical blocks through contextual table build
         ),
     );
 
-  const input: InputRichMessage = builder.build();
+  const input: InputRichMessage<string> = builder.build();
 
   expect(JSON.parse(JSON.stringify(input))).toEqual({
     blocks: [
@@ -71,7 +71,7 @@ test("fluent builds and block snapshots do not change retroactively", () => {
 
   external.text = "external input mutation";
   (blocks[0] as InputRichBlockParagraph).text = "external snapshot mutation";
-  (first.blocks[0] as InputRichBlockParagraph).text = "old build mutation";
+  (first.blocks![0] as InputRichBlockParagraph).text = "old build mutation";
 
   builder.paragraph("second");
   const second = builder.build();
@@ -79,7 +79,7 @@ test("fluent builds and block snapshots do not change retroactively", () => {
   expect(blocks).toHaveLength(1);
   expect(first.blocks).toHaveLength(1);
   expect(second.blocks).toHaveLength(2);
-  expect((second.blocks[0] as InputRichBlockParagraph).text).toBe("first");
+  expect((second.blocks![0] as InputRichBlockParagraph).text).toBe("first");
 });
 
 test("table builds and row snapshots do not share mutable cells", () => {

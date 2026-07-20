@@ -4,7 +4,7 @@ import {
   Footer, Heading, List, ListItem, Map, MathBlock, Paragraph, Photo, Pre,
   PullQuote, RichMessage, Slideshow, Table, TableCell, TableRow, Thinking,
   Video, VoiceNote, expectRichMessage,
-} from "../src/jsx.js";
+} from "../src/components";
 
 const photo = { type: "photo" as const, media: "photo-file-id", has_spoiler: true };
 const video = { type: "video" as const, media: "video-file-id", width: 1280, height: 720 };
@@ -45,24 +45,24 @@ test("builds every InputRichBlock variant", () => {
   );
 
   expect(output.is_rtl).toBe(true);
-  expect(output.blocks.map((item) => item.type)).toEqual([
+  expect(output.blocks!.map((item) => item.type)).toEqual([
     "heading", "pre", "footer", "divider", "mathematical_expression", "anchor",
     "list", "blockquote", "pullquote", "collage", "slideshow", "table", "details",
     "map", "animation", "audio", "photo", "video", "voice_note", "thinking",
   ]);
-  expect(output.blocks[6]).toEqual({
+  expect(output.blocks![6]).toEqual({
     type: "list",
     items: [
       { blocks: [{ type: "paragraph", text: "done" }], has_checkbox: true, is_checked: true },
       { blocks: [{ type: "paragraph", text: "four" }], value: 4, type: "I" },
     ],
   });
-  expect(output.blocks[9]).toEqual({
+  expect(output.blocks![9]).toEqual({
     type: "collage",
     blocks: [{ type: "photo", photo }],
     caption: { text: "Gallery", credit: "Photographer" },
   });
-  expect(output.blocks[11]).toEqual({
+  expect(output.blocks![11]).toEqual({
     type: "table",
     cells: [
       [
@@ -78,13 +78,13 @@ test("builds every InputRichBlock variant", () => {
     is_striped: true,
     caption: "Numbers",
   });
-  expect(output.blocks[12]).toEqual({
+  expect(output.blocks![12]).toEqual({
     type: "details",
     summary: { type: "bold", text: "More" },
     blocks: [{ type: "paragraph", text: "Hidden-ish" }],
     is_open: true,
   });
-  expect(output.blocks[13]).toEqual({
+  expect(output.blocks![13]).toEqual({
     type: "map",
     location: { latitude: 51.5, longitude: -0.12 },
     zoom: 12,

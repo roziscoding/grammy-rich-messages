@@ -1,4 +1,4 @@
-import * as rm from "../src/core.js";
+import * as rm from "../src/core";
 import {
   Divider,
   ListItem,
@@ -9,7 +9,7 @@ import {
   TableRow,
   expectRichMessage,
   expectTableRow,
-} from "../src/jsx.js";
+} from "../src/components";
 import {
   type InputMediaPhoto,
   type InputRichMessage,
@@ -19,7 +19,7 @@ import {
   type MessageEntity,
   type RichBlockTableCell,
   type TableRowValue,
-} from "../src/core.js";
+} from "../src/core";
 
 function expectType<T>(_value: T): void {}
 
@@ -29,11 +29,11 @@ function typeSafetyAssertions(): void {
     offset: 0,
     length: 1,
     unix_time: 0,
-    date_time_format: "dd MMM yyyy",
+    date_time_format: "wDt",
   };
   void dateTimeEntity;
 
-  const htmlMessage: InputRichMessage = {
+  const htmlMessage: InputRichMessage<string> = {
     html: "<p>Hello</p>",
     media: [{ id: "hero", media: { type: "photo", media: "photo-id" } }],
     is_rtl: false,
@@ -42,10 +42,12 @@ function typeSafetyAssertions(): void {
   void htmlMessage;
   void invisibleCell;
 
-  // @ts-expect-error exactly one content representation is allowed.
-  const conflictingMessage: InputRichMessage = { blocks: [], html: "<p>Hello</p>" };
-  // @ts-expect-error parse_mode and caption_entities are mutually exclusive.
-  const conflictingCaption: InputMediaPhoto = {
+  // grammY's InputRichMessage is a flat interface with independent optional
+  // content fields, so it does not enforce that exactly one representation is set.
+  const permissiveMessage: InputRichMessage<string> = { blocks: [], html: "<p>Hello</p>" };
+  // grammY's InputMedia types expose parse_mode and caption_entities as
+  // independent optionals rather than a mutually exclusive union.
+  const permissiveCaption: InputMediaPhoto<string> = {
     type: "photo",
     media: "id",
     parse_mode: "HTML",
@@ -53,12 +55,12 @@ function typeSafetyAssertions(): void {
   };
   // @ts-expect-error text_link entities require their URL.
   const incompleteEntity: MessageEntity = { type: "text_link", offset: 0, length: 1 };
-  void conflictingMessage;
-  void conflictingCaption;
+  void permissiveMessage;
+  void permissiveCaption;
   void incompleteEntity;
 
   // @ts-expect-error InputMedia fields are closed against misspelled Bot API properties.
-  const invalidMedia: InputMediaPhoto = { type: "photo", media: "id", has_spolier: true };
+  const invalidMedia: InputMediaPhoto<string> = { type: "photo", media: "id", has_spolier: true };
   void invalidMedia;
 
   // @ts-expect-error checked is only meaningful when checkbox is enabled.
@@ -75,8 +77,8 @@ function typeSafetyAssertions(): void {
   rm.table(functionalRow);
 
   expectType<InputRichBlockParagraph>(rm.paragraph("canonical block"));
-  expectType<InputRichBlockPhoto>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
-  expectType<InputRichMessage>(rm.richMessage(rm.paragraph("canonical message")));
+  expectType<InputRichBlockPhoto<string>>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
+  expectType<InputRichMessage<string>>(rm.richMessage(rm.paragraph("canonical message")));
 
   // @ts-expect-error functional table composition only accepts table-row nodes.
   rm.table(rm.paragraph("not a row"));
@@ -99,7 +101,7 @@ function typeSafetyAssertions(): void {
   void functionalInsideJsx;
 
   const output = expectRichMessage(<RichMessage><Paragraph>Hello</Paragraph></RichMessage>);
-  const first = output.blocks[0]!;
+  const first = output.blocks![0]!;
 
   if (first.type === "table") {
     expectType<InputRichBlockTable>(first);

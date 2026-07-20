@@ -4,10 +4,10 @@ import {
   tableRow,
   type TableCellOptions,
   type TableOptions,
-} from "../functions/blocks.js";
-import type { RichTextInput } from "../functions/text.js";
-import { cloneValue, type BlockValue, type TableCellValue, type TableRowValue } from "../values.js";
-import type { InputRichBlockTable } from "../types.js";
+} from "../core/blocks";
+import type { RichTextInput } from "../core/text";
+import { cloneValue, type BlockValue, type TableCellValue, type TableRowValue } from "../core/values";
+import type { InputRichBlockTable } from "../deps";
 
 export type TableRowConfigurator = (row: TableRowBuilder) => unknown;
 export type TableConfigurator = (table: TableBuilder) => unknown;
@@ -59,7 +59,7 @@ export class TableBuilder {
     return this;
   }
 
-  build(): BlockValue<InputRichBlockTable> {
+  build(): BlockValue<never, InputRichBlockTable> {
     return table(cloneValue(this.#options), ...cloneValue(this.#rows));
   }
 }

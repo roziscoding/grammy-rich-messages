@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import * as builder from "../src/builder.js";
-import * as core from "../src/core.js";
-import * as jsx from "../src/jsx.js";
+import * as builder from "../src/fluent";
+import * as core from "../src/core";
+import * as jsx from "../src/components";
 
 test("public entrypoints expose separate functional, JSX, and fluent surfaces", () => {
   expect(typeof core.richMessage).toBe("function");

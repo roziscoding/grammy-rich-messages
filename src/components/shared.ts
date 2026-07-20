@@ -4,4 +4,4 @@ export type {
   ElementChild,
   ElementChildrenProps,
   NoChildrenProps,
-} from "../jsx-runtime.js";
+} from "./jsx-runtime";

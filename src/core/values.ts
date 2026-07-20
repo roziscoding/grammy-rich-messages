@@ -1,20 +1,31 @@
 import type {
   InputRichBlock,
-  InputRichMessageBlocks,
-  RichBlockListItem,
+  InputRichBlockListItem,
+  InputRichMessage,
   RichBlockTableCell,
-  RichTextEntity,
-} from "./types.js";
+  RichText,
+} from "../deps";
 
 const valueKindKey = "__telegramRichMessagesValueKind" as const;
 type ValueKind = "rich-text" | "block" | "list-item" | "table-cell" | "table-row" | "rich-message";
 export type BrandedValue<T, K extends ValueKind> = T & { readonly __telegramRichMessagesValueKind: K };
 
-export type RichTextValue<T extends RichTextEntity = RichTextEntity> = BrandedValue<T, "rich-text">;
-export type BlockValue<T extends InputRichBlock = InputRichBlock> = BrandedValue<T, "block">;
-export type ListItemValue = BrandedValue<RichBlockListItem, "list-item">;
+/**
+ * The file type carried by media-bearing values. It is `string` (a file_id or
+ * URL) by default, and widens to whatever upload representation a caller passes
+ * to a media block, flowing outward through containers up to the message.
+ */
+export type RichTextValue<T extends RichText = RichText> = BrandedValue<T, "rich-text">;
+export type BlockValue<F = string, T extends InputRichBlock<F> = InputRichBlock<F>> = BrandedValue<T, "block">;
+/**
+ * A `BlockValue` selected by its `type` discriminant. `F` defaults to `never`
+ * for blocks that carry no file, and is supplied only by media-bearing blocks
+ * and the containers that thread it through.
+ */
+export type BlockValueOf<K extends InputRichBlock<never>["type"], F = never> = BlockValue<F, Extract<InputRichBlock<F>, { type: K }>>;
+export type ListItemValue<F = string> = BrandedValue<InputRichBlockListItem<F>, "list-item">;
 export type TableCellValue = BrandedValue<RichBlockTableCell, "table-cell">;
-export type RichMessageValue = BrandedValue<InputRichMessageBlocks, "rich-message">;
+export type RichMessageValue<F = string> = BrandedValue<InputRichMessage<F>, "rich-message">;
 
 export interface TableRowValue {
   readonly cells: TableCellValue[];

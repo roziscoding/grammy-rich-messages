@@ -1,4 +1,4 @@
-import type { BlockValue, ListItemValue, RichMessageValue, RichTextValue, TableCellValue, TableRowValue } from "./values.js";
+import type { BlockValue, ListItemValue, RichMessageValue, RichTextValue, TableCellValue, TableRowValue } from "../core/values";
 
 export type Element = RichTextValue | BlockValue | ListItemValue | TableCellValue | TableRowValue | RichMessageValue;
 export type Child = Element | string | number | boolean | null | undefined | readonly Child[];

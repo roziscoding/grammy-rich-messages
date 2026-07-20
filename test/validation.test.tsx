@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/jsx.js";
+import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/components";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
 
@@ -39,7 +39,7 @@ test("accepts the documented zero boundary for map dimensions", () => {
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={0} width={0} height={0} />
     </RichMessage>,
-  ).blocks[0]).toEqual({
+  ).blocks![0]).toEqual({
     type: "map",
     location: { latitude: 0, longitude: 0 },
     zoom: 0,
