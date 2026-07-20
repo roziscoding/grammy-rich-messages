@@ -45,7 +45,7 @@ export type CaptionProps =
 
 export type Component<P = Record<string, unknown>> = (props: P) => Element;
 
-export const Fragment = Symbol.for("telegram-rich-messages.fragment");
+export const Fragment = Symbol.for("grammy-rich-messages.fragment");
 
 export function jsx(
     type: Component<any> | typeof Fragment,

@@ -7,6 +7,6 @@ import { RichMessage } from "../../src/fluent.ts";
 // core entrypoint.
 export const simple = new RichMessage()
     .heading("Welcome", { size: 1 })
-    .paragraph("Hello from ", bold("telegram-rich-messages"), ".");
+    .paragraph("Hello from ", bold("grammy-rich-messages"), ".");
 
 export const simpleJson = JSON.stringify(simple);

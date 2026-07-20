@@ -12,7 +12,7 @@ export const simple = expectRichMessage(
     <RichMessage>
         <Heading size={1}>Welcome</Heading>
         <Paragraph>
-            Hello from <Bold>telegram-rich-messages</Bold>.
+            Hello from <Bold>grammy-rich-messages</Bold>.
         </Paragraph>
     </RichMessage>,
 );

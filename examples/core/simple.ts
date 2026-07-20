@@ -5,7 +5,7 @@ import { bold, heading, paragraph, richMessage } from "../../src/core.ts";
 // builder accepts as a child.
 export const simple = richMessage(
     heading({ size: 1 }, "Welcome"),
-    paragraph("Hello from ", bold("telegram-rich-messages"), "."),
+    paragraph("Hello from ", bold("grammy-rich-messages"), "."),
 );
 
 export const simpleJson = JSON.stringify(simple);

@@ -1,5 +1,5 @@
 {
-    "name": "telegram-rich-messages",
+    "name": "grammy-rich-messages",
     "version": "0.1.0",
     "description": "Compose Telegram Bot API rich messages with typed functions, fluent builders, and TSX",
     "type": "commonjs",
@@ -50,11 +50,11 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com/roziscoding/telegram-rich-messages.git"
+        "url": "git+ssh://git@github.com/roziscoding/grammy-rich-messages.git"
     },
-    "homepage": "https://github.com/roziscoding/telegram-rich-messages#readme",
+    "homepage": "https://github.com/roziscoding/grammy-rich-messages#readme",
     "bugs": {
-        "url": "https://github.com/roziscoding/telegram-rich-messages/issues"
+        "url": "https://github.com/roziscoding/grammy-rich-messages/issues"
     },
     "peerDependencies": {
         "grammy": "^1.45.1"

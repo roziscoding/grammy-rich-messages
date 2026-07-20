@@ -2,11 +2,11 @@
     "lock": false,
     "compilerOptions": {
         "jsx": "react-jsx",
-        "jsxImportSource": "telegram-rich-messages/jsx"
+        "jsxImportSource": "grammy-rich-messages/jsx"
     },
     "imports": {
-        "telegram-rich-messages/jsx/jsx-runtime": "./src/components/jsx-runtime.ts",
-        "telegram-rich-messages/jsx/jsx-dev-runtime": "./src/components/jsx-runtime.ts",
+        "grammy-rich-messages/jsx/jsx-runtime": "./src/components/jsx-runtime.ts",
+        "grammy-rich-messages/jsx/jsx-dev-runtime": "./src/components/jsx-runtime.ts",
         "@std/expect": "jsr:@std/expect@^1",
         "@std/testing": "jsr:@std/testing@^1"
     },
