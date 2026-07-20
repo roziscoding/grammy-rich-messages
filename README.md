@@ -8,6 +8,8 @@ Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-m
 - Runtime validation for JavaScript, casts, and TSX composition
 - Covers the Bot API 10.2 rich-text entities and block types
 
+Use the functional API when you want the strongest TypeScript guarantees: builders preserve exact node kinds, so invalid nesting is caught before runtime, but deeply nested messages can be harder to scan. TSX is usually easier to read and works well with fragments, conditions, arrays, and custom components; the trade-off is that TypeScript widens JSX expressions to `JSX.Element`, so parent-child hierarchy is validated at runtime instead. Both APIs create the same nodes and can be mixed when that reads better.
+
 ## Functional API
 
 ```ts
