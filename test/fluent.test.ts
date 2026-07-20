@@ -6,6 +6,7 @@ import {
 import {
   bold,
   paragraph,
+  type InputFile,
   type InputRichBlockParagraph,
   type InputRichMessage,
   type RichBlockTableCell,
@@ -17,7 +18,7 @@ const results = [
 ];
 
 test("fluent builders accumulate canonical blocks through contextual table builders", () => {
-  const input: InputRichMessage<string> = new RichMessage({ skipEntityDetection: true })
+  const input: InputRichMessage<InputFile> = new RichMessage({ skipEntityDetection: true })
     .heading("Build report", { size: 1 })
     .paragraph("Status: ", bold("green"))
     .table(

@@ -11,6 +11,7 @@ import {
   expectTableRow,
 } from "../src/components";
 import {
+  type InputFile,
   type InputMediaPhoto,
   type InputRichMessage,
   type InputRichBlockParagraph,
@@ -77,8 +78,8 @@ function typeSafetyAssertions(): void {
   rm.table(functionalRow);
 
   expectType<InputRichBlockParagraph>(rm.paragraph("canonical block"));
-  expectType<InputRichBlockPhoto<string>>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
-  expectType<InputRichMessage<string>>(rm.richMessage(rm.paragraph("canonical message")));
+  expectType<InputRichBlockPhoto<InputFile>>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
+  expectType<InputRichMessage<InputFile>>(rm.richMessage(rm.paragraph("canonical message")));
 
   // @ts-expect-error functional table composition only accepts table-row nodes.
   rm.table(rm.paragraph("not a row"));
