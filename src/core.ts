@@ -1,6 +1,6 @@
-export * from "./core/blocks";
-export * from "./core/message";
-export * from "./core/text";
+export * from "./core/blocks.ts";
+export * from "./core/message.ts";
+export * from "./core/text.ts";
 export type {
   BlockValue,
   BlockValueOf,
@@ -9,5 +9,5 @@ export type {
   RichTextValue,
   TableCellValue,
   TableRowValue,
-} from "./core/values";
-export type * from "./deps";
+} from "./core/values.ts";
+export type * from "./deps.deno.ts";

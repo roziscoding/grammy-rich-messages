@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { expect } from "@std/expect";
+import { describe, it as test } from "@std/testing/bdd";
 import {
   AnchorLink,
   BankCard,
@@ -28,7 +29,7 @@ import {
   TextMention,
   Underline,
   expectRichMessage,
-} from "../src/components";
+} from "../src/components.ts";
 
 describe("expectRichMessage", () => {
   test("composes text blocks and nested rich text from TSX", () => {

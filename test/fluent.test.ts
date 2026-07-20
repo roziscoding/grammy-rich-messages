@@ -1,16 +1,16 @@
-import { expect, test } from "bun:test";
+import { expect } from "@std/expect";
+import { it as test } from "@std/testing/bdd";
 import {
   RichMessage,
   TableBuilder,
-} from "../src/fluent";
+} from "../src/fluent.ts";
 import {
   bold,
   paragraph,
-  type InputFile,
   type InputRichBlockParagraph,
   type InputRichMessage,
   type RichBlockTableCell,
-} from "../src/core";
+} from "../src/core.ts";
 
 const results = [
   { model: "Aster-1", score: 98.4 },
@@ -18,7 +18,7 @@ const results = [
 ];
 
 test("fluent builders accumulate canonical blocks through contextual table builders", () => {
-  const input: InputRichMessage<InputFile> = new RichMessage({ skipEntityDetection: true })
+  const input: InputRichMessage = new RichMessage({ skipEntityDetection: true })
     .heading("Build report", { size: 1 })
     .paragraph("Status: ", bold("green"))
     .table(

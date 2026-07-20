@@ -1,4 +1,4 @@
-import type { Child } from "./jsx-runtime";
+import type { Child } from "./jsx-runtime.ts";
 import {
   anchorLink,
   bankCard,
@@ -28,8 +28,8 @@ import {
   type DateTimeOptions,
   type RichTextInput,
   type TextMentionOptions,
-} from "../core/text";
-import type { ChildrenProps, NoChildrenProps } from "./shared";
+} from "../core/text.ts";
+import type { ChildrenProps, NoChildrenProps } from "./shared.ts";
 
 function richChildren(children: Child): RichTextInput[] {
   return children === undefined ? [] : [children as RichTextInput];

@@ -1,10 +1,11 @@
-import { expect, test } from "bun:test";
+import { expect } from "@std/expect";
+import { it as test } from "@std/testing/bdd";
 import {
   Animation, Audio, BlockAnchor, BlockQuote, Bold, Collage, Details, Divider,
   Footer, Heading, List, ListItem, Map, MathBlock, Paragraph, Photo, Pre,
   PullQuote, RichMessage, Slideshow, Table, TableCell, TableRow, Thinking,
   Video, VoiceNote, expectRichMessage,
-} from "../src/components";
+} from "../src/components.ts";
 
 const photo = { type: "photo" as const, media: "photo-file-id", has_spoiler: true };
 const video = { type: "video" as const, media: "video-file-id", width: 1280, height: 720 };

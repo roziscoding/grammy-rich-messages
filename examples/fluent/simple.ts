@@ -1,5 +1,5 @@
-import { bold } from "../../dist/core";
-import { RichMessage } from "../../dist/fluent";
+import { bold } from "../../src/core.ts";
+import { RichMessage } from "../../src/fluent.ts";
 
 // The fluent interface accumulates blocks through chained method calls. The
 // instance implements InputRichMessage directly, so it serializes to the

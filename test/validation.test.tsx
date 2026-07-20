@@ -1,5 +1,7 @@
-import { expect, test } from "bun:test";
-import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/components";
+// deno-lint-ignore-file no-explicit-any no-constant-condition -- `as any` drives negative type-checks and `if (false)` guards a compile-only assertion
+import { expect } from "@std/expect";
+import { it as test } from "@std/testing/bdd";
+import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/components.ts";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
 

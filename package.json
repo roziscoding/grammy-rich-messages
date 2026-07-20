@@ -2,45 +2,43 @@
   "name": "telegram-rich-messages",
   "version": "0.1.0",
   "description": "Compose Telegram Bot API rich messages with typed functions, fluent builders, and TSX",
-  "type": "module",
+  "type": "commonjs",
   "sideEffects": false,
+  "main": "./out/mod.js",
   "exports": {
     ".": {
-      "types": "./dist/mod.d.ts",
-      "import": "./dist/mod.js"
+      "types": "./out/mod.d.ts",
+      "default": "./out/mod.js"
     },
     "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js"
+      "types": "./out/core.d.ts",
+      "default": "./out/core.js"
     },
     "./components": {
-      "types": "./dist/components.d.ts",
-      "import": "./dist/components.js"
+      "types": "./out/components.d.ts",
+      "default": "./out/components.js"
     },
     "./fluent": {
-      "types": "./dist/fluent.d.ts",
-      "import": "./dist/fluent.js"
+      "types": "./out/fluent.d.ts",
+      "default": "./out/fluent.js"
     },
     "./jsx/jsx-runtime": {
-      "types": "./dist/components/jsx-runtime.d.ts",
-      "import": "./dist/components/jsx-runtime.js"
+      "types": "./out/components/jsx-runtime.d.ts",
+      "default": "./out/components/jsx-runtime.js"
     },
     "./jsx/jsx-dev-runtime": {
-      "types": "./dist/components/jsx-runtime.d.ts",
-      "import": "./dist/components/jsx-runtime.js"
+      "types": "./out/components/jsx-runtime.d.ts",
+      "default": "./out/components/jsx-runtime.js"
     }
   },
-  "files": ["dist"],
+  "files": ["out"],
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "check": "bun run build && tsc --noEmit && bun test",
-    "test": "bun run build && bun test"
+    "build": "deno2node --project tsconfig.json"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "latest"
+    "deno2node": "^6.0.0"
   },
-  "keywords": ["telegram", "bot-api", "rich-message", "tsx", "jsx"],
+  "keywords": ["telegram", "bot-api", "rich-message", "tsx", "jsx", "grammy", "plugin"],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -49,9 +47,6 @@
   "homepage": "https://github.com/roziscoding/telegram-rich-messages#readme",
   "bugs": {
     "url": "https://github.com/roziscoding/telegram-rich-messages/issues"
-  },
-  "dependencies": {
-    "@grammyjs/types": "4.0.0"
   },
   "peerDependencies": {
     "grammy": "^1.45.1"

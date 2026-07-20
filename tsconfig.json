@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
+    "newLine": "lf",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "rootDir": "./src/",
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "verbatimModuleSyntax": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "telegram-rich-messages/jsx",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "module": "commonjs",
+    "outDir": "./out/",
     "skipLibCheck": true,
-    "types": ["bun"]
+    "target": "esnext"
   },
-  "include": ["src", "test", "examples"]
+  "include": [
+    "src",
+  ]
 }

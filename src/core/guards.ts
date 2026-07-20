@@ -1,4 +1,4 @@
-import { kindOf, type BlockValue, type ListItemValue, type RichMessageValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values";
+import { kindOf, type BlockValue, type ListItemValue, type RichMessageValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values.ts";
 
 function expectKind<K extends ReturnType<typeof kindOf>>(value: unknown, kind: K, context: string): asserts value is object {
   if (kindOf(value) !== kind) throw new TypeError(`${context} expects <${kind}>`);

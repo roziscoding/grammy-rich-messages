@@ -1,4 +1,4 @@
-import { Collage, Paragraph, Photo, RichMessage, Video, expectRichMessage } from "../../dist/components";
+import { Collage, Paragraph, Photo, RichMessage, Video, expectRichMessage } from "../../src/components.ts";
 
 // Media components take an InputMedia payload through the `media` prop and,
 // where the block supports it, a caption. <Collage> groups several media

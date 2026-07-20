@@ -1,8 +1,7 @@
-import type { InputRichMessage, Message } from "grammy/types"
-import type { JSX } from "./components/jsx-runtime"
-import type { Context, NextFunction } from "grammy"
-import { expectRichMessage } from "./components"
-import { RichMessage } from "./fluent"
+import type { Context, InputRichMessage, Message, NextFunction } from "./deps.deno.ts"
+import type { JSX } from "./components/jsx-runtime.ts"
+import { expectRichMessage } from "./components.ts"
+import { RichMessage } from "./fluent.ts"
 
 export type RichMessagesFlavor<C = Context> = C & {
     replyRich(richMessage: InputRichMessage | JSX.Element): Promise<Message.RichMessageMessage>
@@ -16,7 +15,7 @@ export const richMessages = async (ctx: RichMessagesFlavor, next: NextFunction) 
             if (input instanceof RichMessage) {
                 return ctx.replyWithRichMessage(input)
             }
-            ctx.replyWithRichMessage(expectRichMessage(input))
+            return ctx.replyWithRichMessage(expectRichMessage(input))
         }
     })
     await next()

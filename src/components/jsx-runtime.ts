@@ -1,4 +1,5 @@
-import type { BlockValue, ListItemValue, RichMessageValue, RichTextValue, TableCellValue, TableRowValue } from "../core/values";
+// deno-lint-ignore-file no-explicit-any no-namespace ban-types no-empty-interface -- JSX runtime typing requires the JSX namespace, `{}`, empty interfaces, and an `any` component type
+import type { BlockValue, ListItemValue, RichMessageValue, RichTextValue, TableCellValue, TableRowValue } from "../core/values.ts";
 
 export type Element = RichTextValue | BlockValue | ListItemValue | TableCellValue | TableRowValue | RichMessageValue;
 export type Child = Element | string | number | boolean | null | undefined | readonly Child[];
@@ -24,7 +25,7 @@ export const jsxs = jsx;
 export const jsxDEV = jsx;
 
 export namespace JSX {
-  export type Element = import("./jsx-runtime.js").Element;
+  export type Element = import("./jsx-runtime.ts").Element;
   export interface ElementChildrenAttribute { children: {}; }
   export interface IntrinsicElements {}
 }

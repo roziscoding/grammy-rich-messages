@@ -4,10 +4,10 @@ import {
   tableRow,
   type TableCellOptions,
   type TableOptions,
-} from "../core/blocks";
-import type { RichTextInput } from "../core/text";
-import { cloneValue, type BlockValue, type TableCellValue, type TableRowValue } from "../core/values";
-import type { InputRichBlockTable } from "../deps";
+} from "../core/blocks.ts";
+import type { RichTextInput } from "../core/text.ts";
+import { cloneValue, type BlockValue, type TableCellValue, type TableRowValue } from "../core/values.ts";
+import type { InputRichBlockTable } from "../deps.deno.ts";
 
 export type TableRowConfigurator = (row: TableRowBuilder) => unknown;
 export type TableConfigurator = (table: TableBuilder) => unknown;
@@ -59,7 +59,7 @@ export class TableBuilder {
     return this;
   }
 
-  build(): BlockValue<never, InputRichBlockTable> {
+  build(): BlockValue<InputRichBlockTable> {
     return table(cloneValue(this.#options), ...cloneValue(this.#rows));
   }
 }

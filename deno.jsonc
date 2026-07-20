@@ -1,0 +1,34 @@
+{
+    "lock": false,
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "telegram-rich-messages/jsx"
+    },
+    "imports": {
+        "telegram-rich-messages/jsx/jsx-runtime": "./src/components/jsx-runtime.ts",
+        "telegram-rich-messages/jsx/jsx-dev-runtime": "./src/components/jsx-runtime.ts",
+        "@std/expect": "jsr:@std/expect@^1",
+        "@std/testing": "jsr:@std/testing@^1"
+    },
+    "tasks": {
+        "check": "deno check --allow-import src/mod.ts src/core.ts src/components.ts src/fluent.ts test/ examples/",
+        "test": "deno test --allow-import",
+        "ok": "deno fmt --check && deno lint && deno task test && deno task check"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "proseWrap": "preserve",
+        "exclude": [
+            "./node_modules/",
+            "./out/",
+            "./package-lock.json"
+        ]
+    },
+    "lint": {
+        "exclude": [
+            "./node_modules/",
+            "./out/",
+            "./package-lock.json"
+        ]
+    }
+}

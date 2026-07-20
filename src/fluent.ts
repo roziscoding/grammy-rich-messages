@@ -1,2 +1,2 @@
-export * from "./fluent/message";
-export * from "./fluent/table";
+export * from "./fluent/message.ts";
+export * from "./fluent/table.ts";

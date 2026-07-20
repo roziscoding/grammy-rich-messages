@@ -1,4 +1,4 @@
-export type { InputFile } from "grammy";
+export type { Context, InputFile, NextFunction } from "https://lib.deno.dev/x/grammy@^1.45/mod.ts";
 export type {
   InputMediaAnimation,
   InputMediaAudio,
@@ -12,6 +12,7 @@ export type {
   InputRichBlockTable,
   InputRichMessage,
   Location,
+  Message,
   MessageEntity,
   RichBlockCaption,
   RichBlockTableCell,
@@ -30,4 +31,4 @@ export type {
   RichTextTextMention,
   RichTextUrl,
   User,
-} from "@grammyjs/types";
+} from "https://lib.deno.dev/x/grammy@^1.45/types.ts";

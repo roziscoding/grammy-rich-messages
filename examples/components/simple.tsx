@@ -1,4 +1,4 @@
-import { Bold, Heading, Paragraph, RichMessage, expectRichMessage } from "../../dist/components";
+import { Bold, Heading, Paragraph, RichMessage, expectRichMessage } from "../../src/components.ts";
 
 // The components interface is the same builders exposed as JSX. `expectRichMessage`
 // narrows the root element to a rich-message value at runtime.

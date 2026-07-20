@@ -1,5 +1,6 @@
-import { expect, test } from "bun:test";
-import * as rm from "../src/core";
+import { expect } from "@std/expect";
+import { it as test } from "@std/testing/bdd";
+import * as rm from "../src/core.ts";
 import {
   bold,
   italic,
@@ -7,14 +8,14 @@ import {
   table,
   tableCell,
   tableRow,
-} from "../src/core";
+} from "../src/core.ts";
 import {
   Bold,
   Paragraph,
   Table,
   expectRichMessage,
-} from "../src/components";
-import * as components from "../src/components";
+} from "../src/components.ts";
+import * as components from "../src/components.ts";
 
 test("functional builders return canonical Telegram values without rendering", () => {
   const formatted = bold("some", italic("text"), "here");

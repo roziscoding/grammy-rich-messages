@@ -202,18 +202,18 @@ Props use camelCase. Builders immediately produce the Bot API's snake_case field
 
 Builders return [`@grammyjs/types`](https://github.com/grammyjs/types) values — `InputRichMessage`, `InputRichBlock`, `RichText`, and friends — carrying a non-enumerable brand used for runtime category checks. The brand disappears in `JSON.stringify` and is structurally assignable to the bare grammY type, so a result passes straight to grammY (or any Bot API client) unchanged. These Telegram types are re-exported from `telegram-rich-messages/core`.
 
-Media builders take a Telegram `InputMedia` payload; its `media` field is a file_id or URL.
+Media builders take a Telegram `InputMedia` payload; its `media` field accepts an upload (grammY's `InputFile`) or a file_id/URL string.
 
 Public composition types include `RichTextValue`, `BlockValue`, `ListItemValue`, `TableCellValue`, `TableRowValue`, and `RichMessageValue`.
 
 ## Development
 
 ```sh
-bun install
-bun run check
+deno task check
+deno task test
 ```
 
-`bun run check` builds declarations, type-checks the source and tests, then runs the test suite.
+`deno task check` type-checks the source, tests, and examples; `deno task test` runs the test suite.
 
 ## Scope
 

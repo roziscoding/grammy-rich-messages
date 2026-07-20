@@ -1,5 +1,5 @@
-import { photo } from "../../dist/core";
-import { RichMessage } from "../../dist/fluent";
+import { photo } from "../../src/core.ts";
+import { RichMessage } from "../../src/fluent.ts";
 
 // Media and container blocks are first-class fluent methods, so they can be
 // composed inline without falling back to add(). The photo() calls nested in

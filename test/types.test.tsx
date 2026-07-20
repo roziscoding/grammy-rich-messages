@@ -1,4 +1,4 @@
-import * as rm from "../src/core";
+import * as rm from "../src/core.ts";
 import {
   Divider,
   ListItem,
@@ -9,9 +9,8 @@ import {
   TableRow,
   expectRichMessage,
   expectTableRow,
-} from "../src/components";
+} from "../src/components.ts";
 import {
-  type InputFile,
   type InputMediaPhoto,
   type InputRichMessage,
   type InputRichBlockParagraph,
@@ -20,11 +19,11 @@ import {
   type MessageEntity,
   type RichBlockTableCell,
   type TableRowValue,
-} from "../src/core";
+} from "../src/core.ts";
 
 function expectType<T>(_value: T): void {}
 
-function typeSafetyAssertions(): void {
+function _typeSafetyAssertions(): void {
   const dateTimeEntity: MessageEntity = {
     type: "date_time",
     offset: 0,
@@ -34,7 +33,7 @@ function typeSafetyAssertions(): void {
   };
   void dateTimeEntity;
 
-  const htmlMessage: InputRichMessage<string> = {
+  const htmlMessage: InputRichMessage = {
     html: "<p>Hello</p>",
     media: [{ id: "hero", media: { type: "photo", media: "photo-id" } }],
     is_rtl: false,
@@ -45,10 +44,10 @@ function typeSafetyAssertions(): void {
 
   // grammY's InputRichMessage is a flat interface with independent optional
   // content fields, so it does not enforce that exactly one representation is set.
-  const permissiveMessage: InputRichMessage<string> = { blocks: [], html: "<p>Hello</p>" };
+  const permissiveMessage: InputRichMessage = { blocks: [], html: "<p>Hello</p>" };
   // grammY's InputMedia types expose parse_mode and caption_entities as
   // independent optionals rather than a mutually exclusive union.
-  const permissiveCaption: InputMediaPhoto<string> = {
+  const permissiveCaption: InputMediaPhoto = {
     type: "photo",
     media: "id",
     parse_mode: "HTML",
@@ -61,7 +60,7 @@ function typeSafetyAssertions(): void {
   void incompleteEntity;
 
   // @ts-expect-error InputMedia fields are closed against misspelled Bot API properties.
-  const invalidMedia: InputMediaPhoto<string> = { type: "photo", media: "id", has_spolier: true };
+  const invalidMedia: InputMediaPhoto = { type: "photo", media: "id", has_spolier: true };
   void invalidMedia;
 
   // @ts-expect-error checked is only meaningful when checkbox is enabled.
@@ -78,8 +77,8 @@ function typeSafetyAssertions(): void {
   rm.table(functionalRow);
 
   expectType<InputRichBlockParagraph>(rm.paragraph("canonical block"));
-  expectType<InputRichBlockPhoto<InputFile>>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
-  expectType<InputRichMessage<InputFile>>(rm.richMessage(rm.paragraph("canonical message")));
+  expectType<InputRichBlockPhoto>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
+  expectType<InputRichMessage>(rm.richMessage(rm.paragraph("canonical message")));
 
   // @ts-expect-error functional table composition only accepts table-row nodes.
   rm.table(rm.paragraph("not a row"));

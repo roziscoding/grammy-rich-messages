@@ -1,4 +1,4 @@
-import { bold, paragraph, richMessage, table, tableCell, tableRow } from "../../dist/core";
+import { bold, paragraph, richMessage, table, tableCell, tableRow } from "../../src/core.ts";
 
 // A table block is a grid of rows, each row a list of cells. Header cells,
 // alignment, and table-level options (bordered/striped/caption) are all

@@ -1,4 +1,4 @@
-import { collage, paragraph, photo, richMessage, video } from "../../dist/core";
+import { collage, paragraph, photo, richMessage, video } from "../../src/core.ts";
 
 // Media blocks carry a Telegram InputMedia payload. The `media` field accepts
 // a file_id or URL string (the default), and collage/slideshow group several

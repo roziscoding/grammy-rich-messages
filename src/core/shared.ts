@@ -1,10 +1,10 @@
-import type { InputFile, RichBlockCaption, RichText } from "../deps";
-import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values";
+import type { RichBlockCaption, RichText } from "../deps.deno.ts";
+import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../core/values.ts";
 
 export type OptionalNested<T> = T | boolean | null | undefined | readonly OptionalNested<T>[];
 export type RichTextInput = OptionalNested<string | number | RichTextValue>;
-export type BlockInput<F = InputFile> = OptionalNested<BlockValue<F>>;
-export type ListItemInput<F = InputFile> = OptionalNested<ListItemValue<F>>;
+export type BlockInput = OptionalNested<BlockValue>;
+export type ListItemInput = OptionalNested<ListItemValue>;
 export type TableCellInput = OptionalNested<TableCellValue>;
 export type TableRowInput = OptionalNested<TableRowValue>;
 
@@ -51,20 +51,20 @@ function collectBranded<T>(values: readonly unknown[], kind: string, context: st
   return result;
 }
 
-export function blocks<F = InputFile>(values: readonly unknown[], context: string): BlockValue<F>[] {
+export function blocks(values: readonly unknown[], context: string): BlockValue[] {
   if (context === "richMessage()") {
-    const result: BlockValue<F>[] = [];
+    const result: BlockValue[] = [];
     for (const item of flattenInputs(values)) {
       if (item == null || typeof item === "boolean") continue;
       if (kindOf(item) !== "block") throw new TypeError("richMessage() only accepts rich-message blocks");
-      result.push(item as BlockValue<F>);
+      result.push(item as BlockValue);
     }
     return result;
   }
-  return collectBranded<BlockValue<F>>(values, "block", context);
+  return collectBranded<BlockValue>(values, "block", context);
 }
-export function listItems<F = InputFile>(values: readonly unknown[], context: string): ListItemValue<F>[] {
-  return collectBranded<ListItemValue<F>>(values, "list-item", context);
+export function listItems(values: readonly unknown[], context: string): ListItemValue[] {
+  return collectBranded<ListItemValue>(values, "list-item", context);
 }
 export function tableRows(values: readonly unknown[], context: string): TableRowValue[] {
   return collectBranded<TableRowValue>(values, "table-row", context);
@@ -78,7 +78,7 @@ export function assertNoChildren(children: readonly unknown[], context: string):
   if (meaningful.length > 0) throw new TypeError(`${context} does not accept children`);
 }
 
-function isPossibleInput(value: unknown, category: string, allowPrimitive: boolean): boolean {
+function isPossibleInput(value: unknown, allowPrimitive: boolean): boolean {
   if (value == null || typeof value === "boolean" || Array.isArray(value)) return true;
   if (allowPrimitive && (typeof value === "string" || typeof value === "number")) return true;
   return kindOf(value) !== undefined;
@@ -89,11 +89,10 @@ export function splitOptions<P extends object, C>(
   rest: readonly C[],
   context: string,
   allowedKeys: readonly string[],
-  childCategory: "rich-text" | "block" | "list-item" | "table-cell" | "table-row",
   allowPrimitive = false,
 ): readonly [P | undefined, readonly C[]] {
   if (first === undefined) return [undefined, rest];
-  if (isPossibleInput(first, childCategory, allowPrimitive)) return [undefined, [first as C, ...rest]];
+  if (isPossibleInput(first, allowPrimitive)) return [undefined, [first as C, ...rest]];
   if (typeof first !== "object" || first === null) return [undefined, [first as C, ...rest]];
   const allowed = new Set(allowedKeys);
   for (const key of Object.keys(first)) {

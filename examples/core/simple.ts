@@ -1,4 +1,4 @@
-import { bold, heading, paragraph, richMessage } from "../../dist/core";
+import { bold, heading, paragraph, richMessage } from "../../src/core.ts";
 
 // The functional interface builds canonical Telegram values by composing
 // plain function calls. Each call returns a branded value that the next

@@ -1,5 +1,5 @@
-import { bold } from "../../dist/core";
-import { RichMessage } from "../../dist/fluent";
+import { bold } from "../../src/core.ts";
+import { RichMessage } from "../../src/fluent.ts";
 
 // The fluent table() method takes a configurator that receives a TableBuilder.
 // Each row() gets a TableRowBuilder whose cell() calls accept content and

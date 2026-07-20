@@ -32,15 +32,15 @@ import {
   type CaptionOptions,
   type DetailsOptions,
   type ListItemInput,
-} from "../core/blocks";
-import { richMessage, type RichMessageOptions } from "../core/message";
-import type { RichTextInput } from "../core/text";
-import { blocks as normalizeBlocks } from "../core/shared";
-import { cloneValue, type BlockValue, type RichMessageValue } from "../core/values";
-import type { InputFile, InputRichMessage } from "../deps";
-import { TableBuilder, type TableConfigurator } from "./table";
+} from "../core/blocks.ts";
+import { richMessage, type RichMessageOptions } from "../core/message.ts";
+import type { RichTextInput } from "../core/text.ts";
+import { blocks as normalizeBlocks } from "../core/shared.ts";
+import { cloneValue, type BlockValue, type RichMessageValue } from "../core/values.ts";
+import type { InputRichMessage } from "../deps.deno.ts";
+import { TableBuilder, type TableConfigurator } from "./table.ts";
 
-export class RichMessage implements InputRichMessage<InputFile> {
+export class RichMessage implements InputRichMessage {
   readonly #options: RichMessageOptions;
   readonly #blocks: BlockValue[] = [];
 

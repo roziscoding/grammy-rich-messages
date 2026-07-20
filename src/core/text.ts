@@ -14,11 +14,11 @@ import type {
   RichTextTextMention,
   RichTextUrl,
   User,
-} from "../deps";
-import { brand, type RichTextValue } from "../core/values";
-import { assertNoChildren, richText, type RichTextInput } from "./shared";
+} from "../deps.deno.ts";
+import { brand, type RichTextValue } from "../core/values.ts";
+import { assertNoChildren, richText, type RichTextInput } from "./shared.ts";
 
-export type { RichTextInput } from "./shared";
+export type { RichTextInput } from "./shared.ts";
 
 type NestedKind = "bold" | "italic" | "underline" | "strikethrough" | "spoiler" | "subscript" | "superscript" | "marked" | "code";
 

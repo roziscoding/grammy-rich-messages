@@ -1,4 +1,4 @@
-import { Bold, Paragraph, RichMessage, Table, TableCell, TableRow, expectRichMessage } from "../../dist/components";
+import { Bold, Paragraph, RichMessage, Table, TableCell, TableRow, expectRichMessage } from "../../src/components.ts";
 
 // Table structure maps directly onto nested components: <Table> holds <TableRow>s,
 // each holding <TableCell>s. Cell props carry header/alignment metadata.
