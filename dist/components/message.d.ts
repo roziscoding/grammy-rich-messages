@@ -1,5 +1,5 @@
-import { type ElementChildrenProps } from "./shared.js";
-export declare function RichMessage(props: ElementChildrenProps & {
+import type { ElementChildrenProps } from "./shared.js";
+export declare function RichMessage({ children, ...options }: ElementChildrenProps & {
     isRtl?: boolean;
     skipEntityDetection?: boolean;
 }): {

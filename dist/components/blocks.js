@@ -1,30 +1,82 @@
-import { node } from "./shared.js";
-export function Paragraph(props) { return node("paragraph", props); }
-export function Heading(props) { return node("heading", props); }
-export function Pre(props) { return node("pre", props); }
-export function Footer(props) { return node("footer", props); }
-export function Divider(props) { return node("divider", props); }
-export function MathBlock(props) { return node("block-mathematical_expression", props); }
-export function BlockAnchor(props) { return node("block-anchor", props); }
-export function List(props) { return node("list", props); }
-export function ListItem(props) { return node("list-item", props); }
-export function BlockQuote(props) { return node("blockquote", props); }
-export function PullQuote(props) { return node("pullquote", props); }
-export function Collage(props) { return node("collage", props); }
-export function Slideshow(props) { return node("slideshow", props); }
-export function Table(props) { return node("table", props); }
-export function TableRow(props) { return node("table-row", props); }
-export function TableCell(props) { return node("table-cell", props); }
-export function Details(props) { return node("details", props); }
-export function Map(props) { return node("map", props); }
-export function Animation(props) { return node("animation", props); }
-export function Audio(props) { return node("audio", props); }
-export function Photo(props) { return node("photo", props); }
-export function Video(props) { return node("video", props); }
-export function VoiceNote(props) { return node("voice_note", props); }
+import { animation, audio, blockAnchor, blockQuote, collage, details, divider, footer, heading, list, listItem, map as mapBuilder, mathBlock, paragraph, photo, pre, pullQuote, slideshow, table, tableCell, tableRow, thinking, video, voiceNote, } from "../functions/blocks.js";
+function richChildren(children) {
+    return children === undefined ? [] : [children];
+}
+function blockChildren(children) {
+    return children === undefined ? [] : [children];
+}
+function nodeChildren(children) {
+    return children === undefined ? [] : [children];
+}
+function forbiddenChildren(children) {
+    return children === undefined ? [] : [children];
+}
+export function Paragraph({ children }) { return paragraph(...richChildren(children)); }
+export function Heading({ children, ...options }) {
+    return heading(options, ...richChildren(children));
+}
+export function Pre({ children, ...options }) {
+    return pre(options, ...richChildren(children));
+}
+export function Footer({ children }) { return footer(...richChildren(children)); }
+export function Divider({ children }) { return divider(...forbiddenChildren(children)); }
+export function MathBlock({ children, ...options }) {
+    return mathBlock(options, ...forbiddenChildren(children));
+}
+export function BlockAnchor({ children, ...options }) {
+    return blockAnchor(options, ...forbiddenChildren(children));
+}
+export function List({ children }) { return list(...nodeChildren(children)); }
+export function ListItem({ children, ...options }) {
+    return listItem(options, ...blockChildren(children));
+}
+export function BlockQuote({ children, credit }) {
+    const options = credit === undefined ? {} : { credit: credit };
+    return blockQuote(options, ...blockChildren(children));
+}
+export function PullQuote({ children, credit }) {
+    const options = credit === undefined ? {} : { credit: credit };
+    return pullQuote(options, ...richChildren(children));
+}
+export function Collage({ children, ...options }) {
+    return collage(options, ...blockChildren(children));
+}
+export function Slideshow({ children, ...options }) {
+    return slideshow(options, ...blockChildren(children));
+}
+export function Table({ children, ...options }) {
+    return table(options, ...nodeChildren(children));
+}
+export function TableRow({ children }) {
+    return tableRow(...nodeChildren(children));
+}
+export function TableCell({ children, ...options }) {
+    return tableCell(options, ...richChildren(children));
+}
+export function Details({ children, summary, open }) {
+    return details({ summary: summary, ...(open === undefined ? {} : { open }) }, ...blockChildren(children));
+}
+export function Map({ children, ...options }) {
+    return mapBuilder(options, ...forbiddenChildren(children));
+}
+export function Animation({ children, ...options }) {
+    return animation(options, ...forbiddenChildren(children));
+}
+export function Audio({ children, ...options }) {
+    return audio(options, ...forbiddenChildren(children));
+}
+export function Photo({ children, ...options }) {
+    return photo(options, ...forbiddenChildren(children));
+}
+export function Video({ children, ...options }) {
+    return video(options, ...forbiddenChildren(children));
+}
+export function VoiceNote({ children, ...options }) {
+    return voiceNote(options, ...forbiddenChildren(children));
+}
 /**
  * A temporary “Thinking…” block. Telegram only permits this block in
  * sendRichMessageDraft payloads; render() cannot infer the eventual endpoint.
  */
-export function Thinking(props) { return node("thinking", props); }
+export function Thinking({ children }) { return thinking(...richChildren(children)); }
 //# sourceMappingURL=blocks.js.map

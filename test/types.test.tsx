@@ -1,3 +1,4 @@
+import * as rm from "../src/index.js";
 import {
   Divider,
   ListItem,
@@ -10,6 +11,7 @@ import {
   type InputRichBlockParagraph,
   type InputRichBlockTable,
   type MessageEntity,
+  type Node,
   type RichBlockTableCell,
 } from "../src/index.js";
 
@@ -61,6 +63,26 @@ function typeSafetyAssertions(): void {
 
   // @ts-expect-error structural containers do not accept raw text.
   <Table>not a row</Table>;
+
+  const functionalRow: Node<"table-row"> = rm.tableRow(rm.tableCell(rm.bold("typed")));
+  expectType<ReturnType<typeof rm.tableRow>>(functionalRow);
+  rm.table(functionalRow);
+
+  // @ts-expect-error functional table composition only accepts table-row nodes.
+  rm.table(rm.paragraph("not a row"));
+  // @ts-expect-error functional rows only accept table-cell nodes.
+  rm.tableRow(rm.paragraph("not a cell"));
+  // @ts-expect-error functional rich-message roots only accept blocks.
+  rm.richMessage(rm.bold("not a block"));
+  // @ts-expect-error rich-text builders reject block nodes.
+  rm.bold(rm.paragraph("not rich text"));
+
+  const functionalInsideJsx = <Table>{functionalRow}</Table>;
+  const jsxRow = <rm.TableRow><rm.TableCell>guarded</rm.TableCell></rm.TableRow>;
+  // @ts-expect-error JSX erases the row discriminator before strict functional composition.
+  rm.table(jsxRow);
+  rm.table(rm.expectTableRow(jsxRow));
+  void functionalInsideJsx;
 
   const output = render(<RichMessage><Paragraph>Hello</Paragraph></RichMessage>);
   const first = output.blocks[0]!;

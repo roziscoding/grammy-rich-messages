@@ -1,4 +1,2 @@
-export function node(kind, props) {
-    return { kind, props };
-}
+export { node } from "../node.js";
 //# sourceMappingURL=shared.js.map

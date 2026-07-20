@@ -1,9 +1,11 @@
 # telegram-rich-messages
 
-Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with type-safe TSX, then render them to an `InputRichMessage` object.
+Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with type-safe functions, TSX, or both, then render them to an `InputRichMessage` object.
 
 - **No React** and no virtual DOM
 - **No bot framework** and no Bot API client
+- Functional builders preserve exact node kinds for compile-time hierarchy checks
+- Runtime validation protects JavaScript callers, casts, and TSX composition
 - Covers all Bot API 10.2 input rich-text entities and block types
 - Produces plain JSON-ready objects for `sendRichMessage`, `sendRichMessageDraft`, `editMessageText`, or `InputRichMessageContent`
 
@@ -178,17 +180,125 @@ const richMessage = render(
 );
 ```
 
-## Component map
+### Functional composition
 
-| Bot API concept | TSX components |
-|---|---|
-| Root | `RichMessage` |
-| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`, `Thinking` |
-| Structure | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details` |
-| Layout | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map` |
-| Media | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote` |
-| Text styling | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code` |
-| Text entities | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` |
+Every TSX component has a lower-camel-case functional builder. Builders with props receive an options object first; child nodes follow as variadic arguments:
+
+```ts
+import {
+  bold,
+  heading,
+  list,
+  listItem,
+  paragraph,
+  richMessage,
+  table,
+  tableCell,
+  tableRow,
+  render,
+} from "telegram-rich-messages";
+
+const message = richMessage(
+  heading({ size: 1 }, "Build report"),
+  paragraph("Status: ", bold("green")),
+  list(
+    listItem({ checkbox: true, checked: true }, paragraph("Type-check")),
+    listItem({ checkbox: true, checked: true }, paragraph("Run tests")),
+  ),
+  table(
+    { bordered: true, caption: "Benchmark" },
+    tableRow(
+      tableCell({ header: true }, "Model"),
+      tableCell({ header: true, align: "right" }, "Score"),
+    ),
+    tableRow(
+      tableCell("Aster-1"),
+      tableCell({ align: "right" }, bold(98.4)),
+    ),
+  ),
+);
+
+const input = render(message);
+```
+
+Function return types preserve their discriminator. For example, `tableRow()` returns `Node<"table-row">`, so invalid hierarchy is caught by TypeScript:
+
+```ts
+table(tableRow(tableCell("valid"))); // valid
+table(paragraph("not a row"));       // TypeScript error
+bold(paragraph("not rich text"));    // TypeScript error
+```
+
+The same rules are checked at runtime. This protects plain JavaScript consumers and TypeScript code that arrives through `any`, `unknown`, or a cast instead of merely trusting the declaration file.
+
+### Mixing functions and TSX
+
+Functional nodes can be embedded directly in TSX. Custom components can also delegate to builders:
+
+```tsx
+import {
+  Paragraph,
+  RichMessage,
+  bold,
+  table,
+  tableCell,
+  tableRow,
+} from "telegram-rich-messages";
+
+function ResultRow({ name, score }: { name: string; score: number }) {
+  return tableRow(
+    tableCell(name),
+    tableCell({ align: "right" }, bold(score)),
+  );
+}
+
+const message = (
+  <RichMessage>
+    <Paragraph>Generated with TSX.</Paragraph>
+    {table(
+      { bordered: true },
+      ResultRow({ name: "Aster-1", score: 98.4 }),
+    )}
+  </RichMessage>
+);
+```
+
+TypeScript deliberately gives every JSX expression the broad `JSX.Element` type. To move a JSX node back into a strict functional boundary, narrow it explicitly with a runtime guard:
+
+```tsx
+import {
+  TableCell,
+  TableRow,
+  bold,
+  expectTableRow,
+  richMessage,
+  table,
+} from "telegram-rich-messages";
+
+const row = (
+  <TableRow>
+    <TableCell>{bold("hybrid")}</TableCell>
+  </TableRow>
+);
+
+const message = richMessage(
+  table(expectTableRow(row)),
+);
+```
+
+Available guards are `expectRichText`, `expectBlock`, `expectListItem`, `expectTableRow`, and `expectTableCell`. They validate the runtime node kind and return the corresponding narrowed TypeScript type. JavaScript callers may pass JSX nodes directly to builders—the builders still perform the same runtime checks—but the explicit guards preserve strict typing in TypeScript.
+
+## API map
+
+| Bot API concept | TSX components | Functional builders |
+|---|---|---|
+| Root | `RichMessage` | `richMessage` |
+| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`, `Thinking` | `paragraph`, `heading`, `pre`, `footer`, `thinking` |
+| Structure | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details` | `divider`, `mathBlock`, `blockAnchor`, `list`, `listItem`, `blockQuote`, `pullQuote`, `details` |
+| Layout | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map` | `collage`, `slideshow`, `table`, `tableRow`, `tableCell`, `map` |
+| Media | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote` | `animation`, `audio`, `photo`, `video`, `voiceNote` |
+| Text styling | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code` | `bold`, `italic`, `underline`, `strikethrough`, `spoiler`, `subscript`, `superscript`, `marked`, `code` |
+| Text entities | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
 
 Component props use idiomatic camelCase; `render()` converts them to the Bot API's snake_case fields. Invalid block nesting and invalid map dimensions are rejected before an object is returned.
 
@@ -219,7 +329,7 @@ if (first?.type === "table") {
 }
 ```
 
-TypeScript treats every JSX expression as the opaque global `JSX.Element` type. Consequently, component identity inside `children` cannot be checked statically: `<Table><Paragraph /></Table>` compiles, but `render()` rejects it. Exact Telegram nesting rules are therefore enforced at runtime.
+TypeScript treats every JSX expression as the opaque global `JSX.Element` type. Consequently, component identity inside JSX `children` cannot be checked statically: `<Table><Paragraph /></Table>` compiles, but the component factory rejects it at runtime. Functional builders preserve exact node kinds and catch the equivalent `table(paragraph())` call at compile time as well as runtime.
 
 ## Development
 
@@ -228,6 +338,7 @@ The source is organized by responsibility:
 ```text
 src/
 ├── components/   # Public TSX component factories
+├── functions/    # Typed builders, hierarchy validators, narrowing guards
 ├── serialize/    # Rich-text and block serializer registries
 ├── render.ts     # RichMessage root conversion
 ├── types.ts      # Public Bot API output and media types

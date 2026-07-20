@@ -10,7 +10,7 @@ if (false) {
 
 test("rejects compositions that cannot be sent as InputRichMessage", () => {
   expect(() => render(<Paragraph>not a root</Paragraph>)).toThrow("<RichMessage> root");
-  expect(() => render(RichMessage({ children: "plain text at block level" } as any))).toThrow("only accepts TSX elements");
+  expect(() => render(RichMessage({ children: "plain text at block level" } as any))).toThrow("only accepts rich-message blocks");
   expect(() => render(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={25} width={100} height={100} />

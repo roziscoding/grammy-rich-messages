@@ -1,41 +1,41 @@
-import { type ChildrenProps, type NoChildrenProps } from "./shared.js";
-export declare function Bold(props: ChildrenProps): {
+import type { ChildrenProps, NoChildrenProps } from "./shared.js";
+export declare function Bold({ children }: ChildrenProps): {
     readonly kind: "bold";
     readonly props: ChildrenProps;
 };
-export declare function Italic(props: ChildrenProps): {
+export declare function Italic({ children }: ChildrenProps): {
     readonly kind: "italic";
     readonly props: ChildrenProps;
 };
-export declare function Underline(props: ChildrenProps): {
+export declare function Underline({ children }: ChildrenProps): {
     readonly kind: "underline";
     readonly props: ChildrenProps;
 };
-export declare function Strikethrough(props: ChildrenProps): {
+export declare function Strikethrough({ children }: ChildrenProps): {
     readonly kind: "strikethrough";
     readonly props: ChildrenProps;
 };
-export declare function Spoiler(props: ChildrenProps): {
+export declare function Spoiler({ children }: ChildrenProps): {
     readonly kind: "spoiler";
     readonly props: ChildrenProps;
 };
-export declare function Subscript(props: ChildrenProps): {
+export declare function Subscript({ children }: ChildrenProps): {
     readonly kind: "subscript";
     readonly props: ChildrenProps;
 };
-export declare function Superscript(props: ChildrenProps): {
+export declare function Superscript({ children }: ChildrenProps): {
     readonly kind: "superscript";
     readonly props: ChildrenProps;
 };
-export declare function Marked(props: ChildrenProps): {
+export declare function Marked({ children }: ChildrenProps): {
     readonly kind: "marked";
     readonly props: ChildrenProps;
 };
-export declare function Code(props: ChildrenProps): {
+export declare function Code({ children }: ChildrenProps): {
     readonly kind: "code";
     readonly props: ChildrenProps;
 };
-export declare function DateTime(props: ChildrenProps & {
+export declare function DateTime({ children, ...options }: ChildrenProps & {
     unixTime: number;
     format: string;
 }): {
@@ -45,7 +45,7 @@ export declare function DateTime(props: ChildrenProps & {
         format: string;
     };
 };
-export declare function TextMention(props: ChildrenProps & {
+export declare function TextMention({ children, ...options }: ChildrenProps & {
     user: Record<string, unknown>;
 }): {
     readonly kind: "text_mention";
@@ -53,7 +53,7 @@ export declare function TextMention(props: ChildrenProps & {
         user: Record<string, unknown>;
     };
 };
-export declare function CustomEmoji(props: {
+export declare function CustomEmoji({ children, ...options }: {
     id: string;
     alt: string;
 } & NoChildrenProps): {
@@ -63,7 +63,7 @@ export declare function CustomEmoji(props: {
         alt: string;
     } & NoChildrenProps;
 };
-export declare function InlineMath(props: {
+export declare function InlineMath({ children, ...options }: {
     expression: string;
 } & NoChildrenProps): {
     readonly kind: "mathematical_expression";
@@ -71,7 +71,7 @@ export declare function InlineMath(props: {
         expression: string;
     } & NoChildrenProps;
 };
-export declare function Link(props: ChildrenProps & {
+export declare function Link({ children, ...options }: ChildrenProps & {
     url: string;
 }): {
     readonly kind: "url";
@@ -79,7 +79,7 @@ export declare function Link(props: ChildrenProps & {
         url: string;
     };
 };
-export declare function Email(props: ChildrenProps & {
+export declare function Email({ children, ...options }: ChildrenProps & {
     address: string;
 }): {
     readonly kind: "email_address";
@@ -87,7 +87,7 @@ export declare function Email(props: ChildrenProps & {
         address: string;
     };
 };
-export declare function Phone(props: ChildrenProps & {
+export declare function Phone({ children, ...options }: ChildrenProps & {
     number: string;
 }): {
     readonly kind: "phone_number";
@@ -95,7 +95,7 @@ export declare function Phone(props: ChildrenProps & {
         number: string;
     };
 };
-export declare function BankCard(props: ChildrenProps & {
+export declare function BankCard({ children, ...options }: ChildrenProps & {
     number: string;
 }): {
     readonly kind: "bank_card_number";
@@ -103,7 +103,7 @@ export declare function BankCard(props: ChildrenProps & {
         number: string;
     };
 };
-export declare function Mention(props: ChildrenProps & {
+export declare function Mention({ children, ...options }: ChildrenProps & {
     username: string;
 }): {
     readonly kind: "mention";
@@ -111,7 +111,7 @@ export declare function Mention(props: ChildrenProps & {
         username: string;
     };
 };
-export declare function Hashtag(props: ChildrenProps & {
+export declare function Hashtag({ children, ...options }: ChildrenProps & {
     value: string;
 }): {
     readonly kind: "hashtag";
@@ -119,7 +119,7 @@ export declare function Hashtag(props: ChildrenProps & {
         value: string;
     };
 };
-export declare function Cashtag(props: ChildrenProps & {
+export declare function Cashtag({ children, ...options }: ChildrenProps & {
     value: string;
 }): {
     readonly kind: "cashtag";
@@ -127,7 +127,7 @@ export declare function Cashtag(props: ChildrenProps & {
         value: string;
     };
 };
-export declare function BotCommand(props: ChildrenProps & {
+export declare function BotCommand({ children, ...options }: ChildrenProps & {
     command: string;
 }): {
     readonly kind: "bot_command";
@@ -135,7 +135,7 @@ export declare function BotCommand(props: ChildrenProps & {
         command: string;
     };
 };
-export declare function TextAnchor(props: {
+export declare function TextAnchor({ children, ...options }: {
     name: string;
 } & NoChildrenProps): {
     readonly kind: "anchor";
@@ -143,7 +143,7 @@ export declare function TextAnchor(props: {
         name: string;
     } & NoChildrenProps;
 };
-export declare function AnchorLink(props: ChildrenProps & {
+export declare function AnchorLink({ children, ...options }: ChildrenProps & {
     name: string;
 }): {
     readonly kind: "anchor_link";
@@ -151,7 +151,7 @@ export declare function AnchorLink(props: ChildrenProps & {
         name: string;
     };
 };
-export declare function Reference(props: ChildrenProps & {
+export declare function Reference({ children, ...options }: ChildrenProps & {
     name: string;
 }): {
     readonly kind: "reference";
@@ -159,7 +159,7 @@ export declare function Reference(props: ChildrenProps & {
         name: string;
     };
 };
-export declare function ReferenceLink(props: ChildrenProps & {
+export declare function ReferenceLink({ children, ...options }: ChildrenProps & {
     name: string;
 }): {
     readonly kind: "reference_link";

@@ -1,27 +1,97 @@
-import { node, type ChildrenProps, type NoChildrenProps } from "./shared.js";
+import type { Child } from "../jsx-runtime.js";
+import {
+  anchorLink,
+  bankCard,
+  bold,
+  botCommand,
+  cashtag,
+  code,
+  customEmoji,
+  dateTime,
+  email,
+  hashtag,
+  inlineMath,
+  italic,
+  link,
+  marked,
+  mention,
+  phone,
+  reference,
+  referenceLink,
+  spoiler,
+  strikethrough,
+  subscript,
+  superscript,
+  textAnchor,
+  textMention,
+  underline,
+  type RichTextInput,
+} from "../functions/text.js";
+import type { ChildrenProps, NoChildrenProps } from "./shared.js";
 
-export function Bold(props: ChildrenProps) { return node("bold", props); }
-export function Italic(props: ChildrenProps) { return node("italic", props); }
-export function Underline(props: ChildrenProps) { return node("underline", props); }
-export function Strikethrough(props: ChildrenProps) { return node("strikethrough", props); }
-export function Spoiler(props: ChildrenProps) { return node("spoiler", props); }
-export function Subscript(props: ChildrenProps) { return node("subscript", props); }
-export function Superscript(props: ChildrenProps) { return node("superscript", props); }
-export function Marked(props: ChildrenProps) { return node("marked", props); }
-export function Code(props: ChildrenProps) { return node("code", props); }
-export function DateTime(props: ChildrenProps & { unixTime: number; format: string }) { return node("date_time", props); }
-export function TextMention(props: ChildrenProps & { user: Record<string, unknown> }) { return node("text_mention", props); }
-export function CustomEmoji(props: { id: string; alt: string } & NoChildrenProps) { return node("custom_emoji", props); }
-export function InlineMath(props: { expression: string } & NoChildrenProps) { return node("mathematical_expression", props); }
-export function Link(props: ChildrenProps & { url: string }) { return node("url", props); }
-export function Email(props: ChildrenProps & { address: string }) { return node("email_address", props); }
-export function Phone(props: ChildrenProps & { number: string }) { return node("phone_number", props); }
-export function BankCard(props: ChildrenProps & { number: string }) { return node("bank_card_number", props); }
-export function Mention(props: ChildrenProps & { username: string }) { return node("mention", props); }
-export function Hashtag(props: ChildrenProps & { value: string }) { return node("hashtag", props); }
-export function Cashtag(props: ChildrenProps & { value: string }) { return node("cashtag", props); }
-export function BotCommand(props: ChildrenProps & { command: string }) { return node("bot_command", props); }
-export function TextAnchor(props: { name: string } & NoChildrenProps) { return node("anchor", props); }
-export function AnchorLink(props: ChildrenProps & { name: string }) { return node("anchor_link", props); }
-export function Reference(props: ChildrenProps & { name: string }) { return node("reference", props); }
-export function ReferenceLink(props: ChildrenProps & { name: string }) { return node("reference_link", props); }
+function richChildren(children: Child): RichTextInput[] {
+  return children === undefined ? [] : [children as RichTextInput];
+}
+
+function forbiddenChildren(children: unknown): never[] {
+  return children === undefined ? [] : [children as never];
+}
+
+export function Bold({ children }: ChildrenProps) { return bold(...richChildren(children)); }
+export function Italic({ children }: ChildrenProps) { return italic(...richChildren(children)); }
+export function Underline({ children }: ChildrenProps) { return underline(...richChildren(children)); }
+export function Strikethrough({ children }: ChildrenProps) { return strikethrough(...richChildren(children)); }
+export function Spoiler({ children }: ChildrenProps) { return spoiler(...richChildren(children)); }
+export function Subscript({ children }: ChildrenProps) { return subscript(...richChildren(children)); }
+export function Superscript({ children }: ChildrenProps) { return superscript(...richChildren(children)); }
+export function Marked({ children }: ChildrenProps) { return marked(...richChildren(children)); }
+export function Code({ children }: ChildrenProps) { return code(...richChildren(children)); }
+
+export function DateTime({ children, ...options }: ChildrenProps & { unixTime: number; format: string }) {
+  return dateTime(options, ...richChildren(children));
+}
+export function TextMention({ children, ...options }: ChildrenProps & { user: Record<string, unknown> }) {
+  return textMention(options, ...richChildren(children));
+}
+export function CustomEmoji({ children, ...options }: { id: string; alt: string } & NoChildrenProps) {
+  return customEmoji(options, ...forbiddenChildren(children));
+}
+export function InlineMath({ children, ...options }: { expression: string } & NoChildrenProps) {
+  return inlineMath(options, ...forbiddenChildren(children));
+}
+export function Link({ children, ...options }: ChildrenProps & { url: string }) {
+  return link(options, ...richChildren(children));
+}
+export function Email({ children, ...options }: ChildrenProps & { address: string }) {
+  return email(options, ...richChildren(children));
+}
+export function Phone({ children, ...options }: ChildrenProps & { number: string }) {
+  return phone(options, ...richChildren(children));
+}
+export function BankCard({ children, ...options }: ChildrenProps & { number: string }) {
+  return bankCard(options, ...richChildren(children));
+}
+export function Mention({ children, ...options }: ChildrenProps & { username: string }) {
+  return mention(options, ...richChildren(children));
+}
+export function Hashtag({ children, ...options }: ChildrenProps & { value: string }) {
+  return hashtag(options, ...richChildren(children));
+}
+export function Cashtag({ children, ...options }: ChildrenProps & { value: string }) {
+  return cashtag(options, ...richChildren(children));
+}
+export function BotCommand({ children, ...options }: ChildrenProps & { command: string }) {
+  return botCommand(options, ...richChildren(children));
+}
+export function TextAnchor({ children, ...options }: { name: string } & NoChildrenProps) {
+  return textAnchor(options, ...forbiddenChildren(children));
+}
+export function AnchorLink({ children, ...options }: ChildrenProps & { name: string }) {
+  return anchorLink(options, ...richChildren(children));
+}
+export function Reference({ children, ...options }: ChildrenProps & { name: string }) {
+  return reference(options, ...richChildren(children));
+}
+export function ReferenceLink({ children, ...options }: ChildrenProps & { name: string }) {
+  return referenceLink(options, ...richChildren(children));
+}

@@ -1,18 +1,11 @@
 import type { Child } from "../jsx-runtime.js";
 import type { InputMediaAnimation, InputMediaAudio, InputMediaPhoto, InputMediaVideo, InputMediaVoiceNote, Location } from "../types.js";
-import { type CaptionProps, type ChildrenProps, type ElementChildrenProps, type NoChildrenProps } from "./shared.js";
-type ListItemSelectionProps = {
-    checkbox: true;
-    checked?: boolean;
-} | {
-    checkbox?: false;
-    checked?: never;
-};
-export declare function Paragraph(props: ChildrenProps): {
+import type { CaptionProps, ChildrenProps, ElementChildrenProps, NoChildrenProps } from "./shared.js";
+export declare function Paragraph({ children }: ChildrenProps): {
     readonly kind: "paragraph";
     readonly props: ChildrenProps;
 };
-export declare function Heading(props: ChildrenProps & {
+export declare function Heading({ children, ...options }: ChildrenProps & {
     size: 1 | 2 | 3 | 4 | 5 | 6;
 }): {
     readonly kind: "heading";
@@ -20,7 +13,7 @@ export declare function Heading(props: ChildrenProps & {
         size: 1 | 2 | 3 | 4 | 5 | 6;
     };
 };
-export declare function Pre(props: ChildrenProps & {
+export declare function Pre({ children, ...options }: ChildrenProps & {
     language?: string;
 }): {
     readonly kind: "pre";
@@ -28,15 +21,15 @@ export declare function Pre(props: ChildrenProps & {
         language?: string;
     };
 };
-export declare function Footer(props: ChildrenProps): {
+export declare function Footer({ children }: ChildrenProps): {
     readonly kind: "footer";
     readonly props: ChildrenProps;
 };
-export declare function Divider(props: NoChildrenProps): {
+export declare function Divider({ children }: NoChildrenProps): {
     readonly kind: "divider";
     readonly props: NoChildrenProps;
 };
-export declare function MathBlock(props: {
+export declare function MathBlock({ children, ...options }: {
     expression: string;
 } & NoChildrenProps): {
     readonly kind: "block-mathematical_expression";
@@ -44,7 +37,7 @@ export declare function MathBlock(props: {
         expression: string;
     } & NoChildrenProps;
 };
-export declare function BlockAnchor(props: {
+export declare function BlockAnchor({ children, ...options }: {
     name: string;
 } & NoChildrenProps): {
     readonly kind: "block-anchor";
@@ -52,11 +45,18 @@ export declare function BlockAnchor(props: {
         name: string;
     } & NoChildrenProps;
 };
-export declare function List(props: ElementChildrenProps): {
+export declare function List({ children }: ElementChildrenProps): {
     readonly kind: "list";
     readonly props: ElementChildrenProps;
 };
-export declare function ListItem(props: ElementChildrenProps & ListItemSelectionProps & {
+type ListItemSelectionProps = {
+    checkbox: true;
+    checked?: boolean;
+} | {
+    checkbox?: false;
+    checked?: never;
+};
+export declare function ListItem({ children, ...options }: ElementChildrenProps & ListItemSelectionProps & {
     value?: number;
     labelType?: "a" | "A" | "i" | "I" | "1";
 }): {
@@ -66,7 +66,7 @@ export declare function ListItem(props: ElementChildrenProps & ListItemSelection
         labelType?: "a" | "A" | "i" | "I" | "1";
     });
 };
-export declare function BlockQuote(props: ElementChildrenProps & {
+export declare function BlockQuote({ children, credit }: ElementChildrenProps & {
     credit?: Child;
 }): {
     readonly kind: "blockquote";
@@ -74,7 +74,7 @@ export declare function BlockQuote(props: ElementChildrenProps & {
         credit?: Child;
     };
 };
-export declare function PullQuote(props: ChildrenProps & {
+export declare function PullQuote({ children, credit }: ChildrenProps & {
     credit?: Child;
 }): {
     readonly kind: "pullquote";
@@ -82,15 +82,15 @@ export declare function PullQuote(props: ChildrenProps & {
         credit?: Child;
     };
 };
-export declare function Collage(props: ElementChildrenProps & CaptionProps): {
+export declare function Collage({ children, ...options }: ElementChildrenProps & CaptionProps): {
     readonly kind: "collage";
     readonly props: ElementChildrenProps & CaptionProps;
 };
-export declare function Slideshow(props: ElementChildrenProps & CaptionProps): {
+export declare function Slideshow({ children, ...options }: ElementChildrenProps & CaptionProps): {
     readonly kind: "slideshow";
     readonly props: ElementChildrenProps & CaptionProps;
 };
-export declare function Table(props: ElementChildrenProps & {
+export declare function Table({ children, ...options }: ElementChildrenProps & {
     bordered?: boolean;
     striped?: boolean;
     caption?: Child;
@@ -102,11 +102,11 @@ export declare function Table(props: ElementChildrenProps & {
         caption?: Child;
     };
 };
-export declare function TableRow(props: ElementChildrenProps): {
+export declare function TableRow({ children }: ElementChildrenProps): {
     readonly kind: "table-row";
     readonly props: ElementChildrenProps;
 };
-export declare function TableCell(props: ChildrenProps & {
+export declare function TableCell({ children, ...options }: ChildrenProps & {
     header?: boolean;
     colspan?: number;
     rowspan?: number;
@@ -122,7 +122,7 @@ export declare function TableCell(props: ChildrenProps & {
         valign?: "top" | "middle" | "bottom";
     };
 };
-export declare function Details(props: ElementChildrenProps & {
+export declare function Details({ children, summary, open }: ElementChildrenProps & {
     summary: Child;
     open?: boolean;
 }): {
@@ -132,7 +132,7 @@ export declare function Details(props: ElementChildrenProps & {
         open?: boolean;
     };
 };
-export declare function Map(props: {
+export declare function Map({ children, ...options }: {
     location: Location;
     zoom: number;
     width: number;
@@ -146,7 +146,7 @@ export declare function Map(props: {
         height: number;
     } & (CaptionProps & NoChildrenProps);
 };
-export declare function Animation(props: {
+export declare function Animation({ children, ...options }: {
     media: InputMediaAnimation;
 } & CaptionProps & NoChildrenProps): {
     readonly kind: "animation";
@@ -154,7 +154,7 @@ export declare function Animation(props: {
         media: InputMediaAnimation;
     } & (CaptionProps & NoChildrenProps);
 };
-export declare function Audio(props: {
+export declare function Audio({ children, ...options }: {
     media: InputMediaAudio;
 } & CaptionProps & NoChildrenProps): {
     readonly kind: "audio";
@@ -162,7 +162,7 @@ export declare function Audio(props: {
         media: InputMediaAudio;
     } & (CaptionProps & NoChildrenProps);
 };
-export declare function Photo(props: {
+export declare function Photo({ children, ...options }: {
     media: InputMediaPhoto;
 } & CaptionProps & NoChildrenProps): {
     readonly kind: "photo";
@@ -170,7 +170,7 @@ export declare function Photo(props: {
         media: InputMediaPhoto;
     } & (CaptionProps & NoChildrenProps);
 };
-export declare function Video(props: {
+export declare function Video({ children, ...options }: {
     media: InputMediaVideo;
 } & CaptionProps & NoChildrenProps): {
     readonly kind: "video";
@@ -178,7 +178,7 @@ export declare function Video(props: {
         media: InputMediaVideo;
     } & (CaptionProps & NoChildrenProps);
 };
-export declare function VoiceNote(props: {
+export declare function VoiceNote({ children, ...options }: {
     media: InputMediaVoiceNote;
 } & CaptionProps & NoChildrenProps): {
     readonly kind: "voice_note";
@@ -190,7 +190,7 @@ export declare function VoiceNote(props: {
  * A temporary “Thinking…” block. Telegram only permits this block in
  * sendRichMessageDraft payloads; render() cannot infer the eventual endpoint.
  */
-export declare function Thinking(props: ChildrenProps): {
+export declare function Thinking({ children }: ChildrenProps): {
     readonly kind: "thinking";
     readonly props: ChildrenProps;
 };
