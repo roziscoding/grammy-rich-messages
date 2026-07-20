@@ -60,7 +60,7 @@ The same checks run at runtime for JavaScript and values coming from `any`, `unk
 ### Fluent API
 
 ```ts
-import { RichMessageBuilder } from "telegram-rich-messages/fluent";
+import { RichMessage } from "telegram-rich-messages/fluent";
 import { bold } from "telegram-rich-messages/core";
 
 const results = [
@@ -68,7 +68,7 @@ const results = [
   { model: "Hermes-2", score: 97.1 },
 ];
 
-const input = new RichMessageBuilder({ skipEntityDetection: true })
+const input = new RichMessage({ skipEntityDetection: true })
   .heading("Build report", { size: 1 })
   .paragraph("Status: ", bold("green"))
   .table(
@@ -80,11 +80,10 @@ const input = new RichMessageBuilder({ skipEntityDetection: true })
       .rows(results, (row, result) => row
         .cell(result.model)
         .cell(bold(result.score), { align: "right" })),
-  )
-  .build();
+  );
 ```
 
-Every functional block builder has a matching method on `RichMessageBuilder`, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block value. `build()` and the `blocks` getter return snapshots; later mutations do not change earlier results.
+A `RichMessage` instance `implements InputRichMessage`, so it can be passed straight to grammY (or any Bot API client); its `toJSON()` produces the canonical value on serialization. Every functional block builder has a matching method, including media (`photo`, `video`, …) and containers (`blockQuote`, `collage`, `details`, …). Use `.add(block)` to append any pre-built block value. The `blocks` getter returns a snapshot; later mutations do not change earlier results.
 
 ### TSX
 
@@ -183,7 +182,7 @@ The package has three public entrypoints:
 
 - `telegram-rich-messages/core` — functional builders and the Telegram types (re-exported from `@grammyjs/types`)
 - `telegram-rich-messages/components` — TSX components and narrowing guards
-- `telegram-rich-messages/fluent` — `RichMessageBuilder`, `TableBuilder`, and `TableRowBuilder`
+- `telegram-rich-messages/fluent` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
 
 Every TSX component has a lower-camel-case builder in `core`.
 

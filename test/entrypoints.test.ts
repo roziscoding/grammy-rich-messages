@@ -15,8 +15,8 @@ test("public entrypoints expose separate functional, JSX, and fluent surfaces", 
   expect("richMessage" in jsx).toBe(false);
   expect("RichMessageBuilder" in jsx).toBe(false);
 
-  expect(typeof builder.RichMessageBuilder).toBe("function");
+  expect(typeof builder.RichMessage).toBe("function");
   expect(typeof builder.TableBuilder).toBe("function");
   expect("richMessage" in builder).toBe(false);
-  expect("RichMessage" in builder).toBe(false);
+  expect("RichMessageBuilder" in builder).toBe(false);
 });

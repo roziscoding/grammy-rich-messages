@@ -37,9 +37,10 @@ import { richMessage, type RichMessageOptions } from "../core/message";
 import type { RichTextInput } from "../core/text";
 import { blocks as normalizeBlocks } from "../core/shared";
 import { cloneValue, type BlockValue, type RichMessageValue } from "../core/values";
+import type { InputRichMessage } from "../deps";
 import { TableBuilder, type TableConfigurator } from "./table";
 
-export class RichMessageBuilder {
+export class RichMessage implements InputRichMessage<string> {
   readonly #options: RichMessageOptions;
   readonly #blocks: BlockValue[] = [];
 
@@ -47,12 +48,20 @@ export class RichMessageBuilder {
     this.#options = { ...options };
   }
 
-  get blocks(): readonly BlockValue[] {
+  get blocks(): BlockValue[] {
     return cloneValue(this.#blocks);
   }
 
+  get is_rtl(): boolean {
+    return this.#options.isRtl === true;
+  }
+
+  get skip_entity_detection(): boolean {
+    return this.#options.skipEntityDetection === true;
+  }
+
   add(...values: readonly BlockInput[]): this {
-    this.#blocks.push(...cloneValue(normalizeBlocks(values, "RichMessageBuilder.add()")));
+    this.#blocks.push(...cloneValue(normalizeBlocks(values, "RichMessage.add()")));
     return this;
   }
 
@@ -145,14 +154,14 @@ export class RichMessageBuilder {
   table(first: TableOptions | TableConfigurator, second?: TableConfigurator): this {
     const options = typeof first === "function" ? {} : first;
     const configure = typeof first === "function" ? first : second;
-    if (configure === undefined) throw new TypeError("RichMessageBuilder.table() requires a configurator");
+    if (configure === undefined) throw new TypeError("RichMessage.table() requires a configurator");
 
     const builder = new TableBuilder(options);
     configure(builder);
     return this.add(builder.build());
   }
 
-  build(): RichMessageValue {
+  toJSON(): RichMessageValue {
     return richMessage(this.#options, ...cloneValue(this.#blocks));
   }
 }

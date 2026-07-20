@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import {
-  RichMessageBuilder,
+  RichMessage,
   TableBuilder,
 } from "../src/fluent";
 import {
@@ -17,7 +17,7 @@ const results = [
 ];
 
 test("fluent builders accumulate canonical blocks through contextual table builders", () => {
-  const builder = new RichMessageBuilder({ skipEntityDetection: true })
+  const input: InputRichMessage<string> = new RichMessage({ skipEntityDetection: true })
     .heading("Build report", { size: 1 })
     .paragraph("Status: ", bold("green"))
     .table(
@@ -32,8 +32,6 @@ test("fluent builders accumulate canonical blocks through contextual table build
           .cell(bold(result.score), { align: "right" }),
         ),
     );
-
-  const input: InputRichMessage<string> = builder.build();
 
   expect(JSON.parse(JSON.stringify(input))).toEqual({
     blocks: [
@@ -63,18 +61,18 @@ test("fluent builders accumulate canonical blocks through contextual table build
   });
 });
 
-test("fluent builds and block snapshots do not change retroactively", () => {
+test("fluent serializations and block snapshots do not change retroactively", () => {
   const external = paragraph("first");
-  const builder = new RichMessageBuilder().add(external);
+  const builder = new RichMessage().add(external);
   const blocks = builder.blocks;
-  const first = builder.build();
+  const first = builder.toJSON();
 
   external.text = "external input mutation";
   (blocks[0] as InputRichBlockParagraph).text = "external snapshot mutation";
-  (first.blocks![0] as InputRichBlockParagraph).text = "old build mutation";
+  (first.blocks![0] as InputRichBlockParagraph).text = "old snapshot mutation";
 
   builder.paragraph("second");
-  const second = builder.build();
+  const second = builder.toJSON();
 
   expect(blocks).toHaveLength(1);
   expect(first.blocks).toHaveLength(1);
@@ -95,6 +93,6 @@ test("table builds and row snapshots do not share mutable cells", () => {
 });
 
 test("fluent builders preserve runtime hierarchy validation", () => {
-  expect(() => new RichMessageBuilder().add(bold("not a block") as never))
-    .toThrow("RichMessageBuilder.add() only accepts <block>");
+  expect(() => new RichMessage().add(bold("not a block") as never))
+    .toThrow("RichMessage.add() only accepts <block>");
 });
