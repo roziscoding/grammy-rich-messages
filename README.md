@@ -1,13 +1,57 @@
 # grammy-rich-messages
 
-Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination. Every entrypoint produces canonical Telegram objects directly.
+Rich message plugin for the [grammY](https://grammy.dev) Telegram bot framework. Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination, then send them with a single `ctx.replyRich(...)`.
 
+- Adds `ctx.replyRich` to grammY through a small middleware; the composition API also works standalone with any Bot API client
 - Built on [`@grammyjs/types`](https://github.com/grammyjs/types) — builders return those exact objects, ready to send with grammY or any Bot API client
 - No React or virtual DOM
-- No Bot API client or bot framework
 - Compile-time hierarchy checks with functional builders
 - Runtime validation for JavaScript, casts, and TSX composition
 - Covers every rich-message block and rich-text entity in `@grammyjs/types`
+
+## Installation
+
+```sh
+npm install grammy-rich-messages
+```
+
+Deno consumers import straight from npm:
+
+```ts
+import { richMessages } from "npm:grammy-rich-messages";
+```
+
+`grammy` is a peer dependency; install it alongside the plugin when sending messages through a bot.
+
+## Plugin
+
+Register the `richMessages` middleware, then reply with any composed value — a functional builder, a `RichMessage` fluent instance, or TSX — through `ctx.replyRich`:
+
+```tsx
+import { Bot } from "grammy";
+import { richMessages, type RichMessagesFlavor } from "grammy-rich-messages";
+import { Bold, Paragraph, RichMessage } from "grammy-rich-messages/components";
+
+const bot = new Bot<RichMessagesFlavor>(process.env.TELEGRAM_TOKEN!);
+
+bot.use(richMessages);
+
+bot.command("start", (ctx) =>
+    ctx.replyRich(
+        <RichMessage>
+            <Paragraph>
+                Hello, <Bold>{ctx.from?.first_name ?? "there"}!</Bold>
+            </Paragraph>
+        </RichMessage>,
+    )
+);
+
+bot.start();
+```
+
+`RichMessagesFlavor` extends the context with `replyRich(message)`, which accepts an `InputRichMessage` or a TSX `JSX.Element` and sends it as a rich message. Without the plugin you can still build values and send them yourself with any Bot API client.
+
+See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with the functional, fluent, and TSX APIs.
 
 ## Usage
 
@@ -188,8 +232,9 @@ Available guards:
 
 ## API
 
-The package has three public entrypoints:
+The package has four public entrypoints:
 
+- `grammy-rich-messages` — the grammY plugin: the `richMessages` middleware and `RichMessagesFlavor`
 - `grammy-rich-messages/core` — functional builders and the Telegram types (re-exported from `@grammyjs/types`)
 - `grammy-rich-messages/components` — TSX components and narrowing guards
 - `grammy-rich-messages/fluent` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
@@ -227,7 +272,7 @@ deno task test
 
 ## Scope
 
-This package only builds rich-message objects. Authentication, HTTP calls, retries, webhooks, and polling belong to the consuming application.
+This package builds rich-message objects and adds a thin grammY plugin to send them. Authentication, HTTP calls, retries, webhooks, and polling remain grammY's responsibility.
 
 ## License
 
