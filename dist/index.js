@@ -62,6 +62,29 @@ function flatten(child) {
         return child.flatMap(flatten);
     return [child];
 }
+function serializeNestedText(value) {
+    return { type: value.kind, text: richText(value.props.children) };
+}
+const richTextSerializers = new globalThis.Map([
+    ...["bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript", "marked", "code"]
+        .map((kind) => [kind, serializeNestedText]),
+    ["date_time", (value) => ({ type: value.kind, text: richText(value.props.children), unix_time: value.props.unixTime, date_time_format: value.props.format })],
+    ["text_mention", (value) => ({ type: value.kind, text: richText(value.props.children), user: value.props.user })],
+    ["custom_emoji", (value) => ({ type: value.kind, custom_emoji_id: value.props.id, alternative_text: value.props.alt })],
+    ["mathematical_expression", (value) => ({ type: value.kind, expression: value.props.expression })],
+    ["url", (value) => ({ type: value.kind, text: richText(value.props.children), url: value.props.url })],
+    ["email_address", (value) => ({ type: value.kind, text: richText(value.props.children), email_address: value.props.address })],
+    ["phone_number", (value) => ({ type: value.kind, text: richText(value.props.children), phone_number: value.props.number })],
+    ["bank_card_number", (value) => ({ type: value.kind, text: richText(value.props.children), bank_card_number: value.props.number })],
+    ["mention", (value) => ({ type: value.kind, text: richText(value.props.children), username: value.props.username })],
+    ["hashtag", (value) => ({ type: value.kind, text: richText(value.props.children), hashtag: value.props.value })],
+    ["cashtag", (value) => ({ type: value.kind, text: richText(value.props.children), cashtag: value.props.value })],
+    ["bot_command", (value) => ({ type: value.kind, text: richText(value.props.children), bot_command: value.props.command })],
+    ["anchor", (value) => ({ type: value.kind, name: value.props.name })],
+    ["anchor_link", (value) => ({ type: value.kind, text: richText(value.props.children), anchor_name: value.props.name })],
+    ["reference", (value) => ({ type: value.kind, text: richText(value.props.children), name: value.props.name })],
+    ["reference_link", (value) => ({ type: value.kind, text: richText(value.props.children), reference_name: value.props.name })],
+]);
 function richText(child) {
     const parts = [];
     for (const item of flatten(child)) {
@@ -76,58 +99,10 @@ function richText(child) {
                 parts.push(value);
             continue;
         }
-        const text = () => richText(item.props.children);
-        if (["bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript", "marked", "code"].includes(item.kind)) {
-            parts.push({ type: item.kind, text: text() });
-        }
-        else if (item.kind === "date_time") {
-            parts.push({ type: item.kind, text: text(), unix_time: item.props.unixTime, date_time_format: item.props.format });
-        }
-        else if (item.kind === "text_mention") {
-            parts.push({ type: item.kind, text: text(), user: item.props.user });
-        }
-        else if (item.kind === "custom_emoji") {
-            parts.push({ type: item.kind, custom_emoji_id: item.props.id, alternative_text: item.props.alt });
-        }
-        else if (item.kind === "mathematical_expression") {
-            parts.push({ type: item.kind, expression: item.props.expression });
-        }
-        else if (item.kind === "url") {
-            parts.push({ type: item.kind, text: text(), url: item.props.url });
-        }
-        else if (item.kind === "email_address") {
-            parts.push({ type: item.kind, text: text(), email_address: item.props.address });
-        }
-        else if (item.kind === "phone_number") {
-            parts.push({ type: item.kind, text: text(), phone_number: item.props.number });
-        }
-        else if (item.kind === "bank_card_number") {
-            parts.push({ type: item.kind, text: text(), bank_card_number: item.props.number });
-        }
-        else if (item.kind === "mention") {
-            parts.push({ type: item.kind, text: text(), username: item.props.username });
-        }
-        else if (item.kind === "hashtag" || item.kind === "cashtag") {
-            parts.push({ type: item.kind, text: text(), [item.kind]: item.props.value });
-        }
-        else if (item.kind === "bot_command") {
-            parts.push({ type: item.kind, text: text(), bot_command: item.props.command });
-        }
-        else if (item.kind === "anchor") {
-            parts.push({ type: item.kind, name: item.props.name });
-        }
-        else if (item.kind === "anchor_link") {
-            parts.push({ type: item.kind, text: text(), anchor_name: item.props.name });
-        }
-        else if (item.kind === "reference") {
-            parts.push({ type: item.kind, text: text(), name: item.props.name });
-        }
-        else if (item.kind === "reference_link") {
-            parts.push({ type: item.kind, text: text(), reference_name: item.props.name });
-        }
-        else {
+        const serializer = richTextSerializers.get(item.kind);
+        if (!serializer)
             throw new TypeError(`Expected rich text, received <${item.kind}>`);
-        }
+        parts.push(serializer(item));
     }
     return parts.length === 1 ? parts[0] : parts;
 }
@@ -192,90 +167,113 @@ function tableCell(value) {
         result.rowspan = value.props.rowspan;
     return result;
 }
+function serializeTextBlock(value) {
+    return { type: value.kind, text: richText(value.props.children) };
+}
+function serializeHeading(value) {
+    return { type: "heading", text: richText(value.props.children), size: value.props.size };
+}
+function serializePre(value) {
+    const result = { type: "pre", text: richText(value.props.children) };
+    setOptional(result, "language", value.props.language);
+    return result;
+}
+function serializeList(value) {
+    return { type: "list", items: childNodes(value.props.children, "<List>").map(listItem) };
+}
+function serializeBlockQuote(value) {
+    const result = {
+        type: "blockquote",
+        blocks: childNodes(value.props.children, "<BlockQuote>").map(block),
+    };
+    if (value.props.credit !== undefined)
+        result.credit = richText(value.props.credit);
+    return result;
+}
+function serializePullQuote(value) {
+    const result = { type: "pullquote", text: richText(value.props.children) };
+    if (value.props.credit !== undefined)
+        result.credit = richText(value.props.credit);
+    return result;
+}
+function serializeBlockCollection(value) {
+    const result = {
+        type: value.kind,
+        blocks: childNodes(value.props.children, `<${value.kind}>`).map(block),
+    };
+    setOptional(result, "caption", caption(value.props));
+    return result;
+}
+function serializeTable(value) {
+    const rows = childNodes(value.props.children, "<Table>").map((row) => {
+        if (row.kind !== "table-row")
+            throw new TypeError("<Table> only accepts <TableRow> children");
+        return childNodes(row.props.children, "<TableRow>").map(tableCell);
+    });
+    const result = { type: "table", cells: rows };
+    if (value.props.bordered === true)
+        result.is_bordered = true;
+    if (value.props.striped === true)
+        result.is_striped = true;
+    if (value.props.caption !== undefined)
+        result.caption = richText(value.props.caption);
+    return result;
+}
+function serializeDetails(value) {
+    const result = {
+        type: "details",
+        summary: richText(value.props.summary),
+        blocks: childNodes(value.props.children, "<Details>").map(block),
+    };
+    if (value.props.open === true)
+        result.is_open = true;
+    return result;
+}
+function serializeMap(value) {
+    const zoom = value.props.zoom;
+    const width = value.props.width;
+    const height = value.props.height;
+    if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24)
+        throw new RangeError("<Map> zoom must be an integer from 0 to 24");
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0 || width + height > 10_000) {
+        throw new RangeError("<Map> width and height must be non-negative integers whose total does not exceed 10000");
+    }
+    if ((width === 0) !== (height === 0) || (width > 0 && Math.max(width / height, height / width) > 20)) {
+        throw new RangeError("<Map> width-to-height ratio must not exceed 20");
+    }
+    const result = { type: "map", location: value.props.location, zoom, width, height };
+    setOptional(result, "caption", caption(value.props));
+    return result;
+}
+function serializeMediaBlock(value) {
+    const result = { type: value.kind, [value.kind]: value.props.media };
+    setOptional(result, "caption", caption(value.props));
+    return result;
+}
+const blockSerializers = new globalThis.Map([
+    ...["paragraph", "footer", "thinking"]
+        .map((kind) => [kind, serializeTextBlock]),
+    ["heading", serializeHeading],
+    ["pre", serializePre],
+    ["divider", () => ({ type: "divider" })],
+    ["block-mathematical_expression", (value) => ({ type: "mathematical_expression", expression: value.props.expression })],
+    ["block-anchor", (value) => ({ type: "anchor", name: value.props.name })],
+    ["list", serializeList],
+    ["blockquote", serializeBlockQuote],
+    ["pullquote", serializePullQuote],
+    ["collage", serializeBlockCollection],
+    ["slideshow", serializeBlockCollection],
+    ["table", serializeTable],
+    ["details", serializeDetails],
+    ["map", serializeMap],
+    ...["animation", "audio", "photo", "video", "voice_note"]
+        .map((kind) => [kind, serializeMediaBlock]),
+]);
 function block(value) {
-    const props = value.props;
-    if (["paragraph", "footer", "thinking"].includes(value.kind)) {
-        return { type: value.kind, text: richText(props.children) };
-    }
-    if (value.kind === "heading")
-        return { type: "heading", text: richText(props.children), size: props.size };
-    if (value.kind === "pre") {
-        const result = { type: "pre", text: richText(props.children) };
-        setOptional(result, "language", props.language);
-        return result;
-    }
-    if (value.kind === "divider")
-        return { type: "divider" };
-    if (value.kind === "block-mathematical_expression")
-        return { type: "mathematical_expression", expression: props.expression };
-    if (value.kind === "block-anchor")
-        return { type: "anchor", name: props.name };
-    if (value.kind === "list")
-        return { type: "list", items: childNodes(props.children, "<List>").map(listItem) };
-    if (value.kind === "blockquote") {
-        const result = { type: "blockquote", blocks: childNodes(props.children, "<BlockQuote>").map(block) };
-        if (props.credit !== undefined)
-            result.credit = richText(props.credit);
-        return result;
-    }
-    if (value.kind === "pullquote") {
-        const result = { type: "pullquote", text: richText(props.children) };
-        if (props.credit !== undefined)
-            result.credit = richText(props.credit);
-        return result;
-    }
-    if (value.kind === "collage" || value.kind === "slideshow") {
-        const result = { type: value.kind, blocks: childNodes(props.children, `<${value.kind}>`).map(block) };
-        setOptional(result, "caption", caption(props));
-        return result;
-    }
-    if (value.kind === "table") {
-        const rows = childNodes(props.children, "<Table>").map((row) => {
-            if (row.kind !== "table-row")
-                throw new TypeError("<Table> only accepts <TableRow> children");
-            return childNodes(row.props.children, "<TableRow>").map(tableCell);
-        });
-        const result = { type: "table", cells: rows };
-        if (props.bordered === true)
-            result.is_bordered = true;
-        if (props.striped === true)
-            result.is_striped = true;
-        if (props.caption !== undefined)
-            result.caption = richText(props.caption);
-        return result;
-    }
-    if (value.kind === "details") {
-        const result = {
-            type: "details",
-            summary: richText(props.summary),
-            blocks: childNodes(props.children, "<Details>").map(block),
-        };
-        if (props.open === true)
-            result.is_open = true;
-        return result;
-    }
-    if (value.kind === "map") {
-        const zoom = props.zoom;
-        const width = props.width;
-        const height = props.height;
-        if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24)
-            throw new RangeError("<Map> zoom must be an integer from 0 to 24");
-        if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0 || width + height > 10_000) {
-            throw new RangeError("<Map> width and height must be non-negative integers whose total does not exceed 10000");
-        }
-        if ((width === 0) !== (height === 0) || (width > 0 && Math.max(width / height, height / width) > 20)) {
-            throw new RangeError("<Map> width-to-height ratio must not exceed 20");
-        }
-        const result = { type: "map", location: props.location, zoom, width, height };
-        setOptional(result, "caption", caption(props));
-        return result;
-    }
-    if (["animation", "audio", "photo", "video", "voice_note"].includes(value.kind)) {
-        const result = { type: value.kind, [value.kind]: props.media };
-        setOptional(result, "caption", caption(props));
-        return result;
-    }
-    throw new TypeError(`Expected a rich-message block, received <${value.kind}>`);
+    const serializer = blockSerializers.get(value.kind);
+    if (!serializer)
+        throw new TypeError(`Expected a rich-message block, received <${value.kind}>`);
+    return serializer(value);
 }
 export function render(element) {
     if (element.kind !== "rich-message")

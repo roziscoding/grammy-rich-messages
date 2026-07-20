@@ -99,6 +99,33 @@ function flatten(child: Child): Exclude<Child, readonly Child[]>[] {
   return [child as Exclude<Child, readonly Child[]>];
 }
 
+type RichTextSerializer = (value: Node) => RichText;
+
+function serializeNestedText(value: Node): RichText {
+  return { type: value.kind, text: richText(value.props.children as Child) };
+}
+
+const richTextSerializers = new globalThis.Map<string, RichTextSerializer>([
+  ...["bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript", "marked", "code"]
+    .map((kind): [string, RichTextSerializer] => [kind, serializeNestedText]),
+  ["date_time", (value) => ({ type: value.kind, text: richText(value.props.children as Child), unix_time: value.props.unixTime, date_time_format: value.props.format })],
+  ["text_mention", (value) => ({ type: value.kind, text: richText(value.props.children as Child), user: value.props.user })],
+  ["custom_emoji", (value) => ({ type: value.kind, custom_emoji_id: value.props.id, alternative_text: value.props.alt })],
+  ["mathematical_expression", (value) => ({ type: value.kind, expression: value.props.expression })],
+  ["url", (value) => ({ type: value.kind, text: richText(value.props.children as Child), url: value.props.url })],
+  ["email_address", (value) => ({ type: value.kind, text: richText(value.props.children as Child), email_address: value.props.address })],
+  ["phone_number", (value) => ({ type: value.kind, text: richText(value.props.children as Child), phone_number: value.props.number })],
+  ["bank_card_number", (value) => ({ type: value.kind, text: richText(value.props.children as Child), bank_card_number: value.props.number })],
+  ["mention", (value) => ({ type: value.kind, text: richText(value.props.children as Child), username: value.props.username })],
+  ["hashtag", (value) => ({ type: value.kind, text: richText(value.props.children as Child), hashtag: value.props.value })],
+  ["cashtag", (value) => ({ type: value.kind, text: richText(value.props.children as Child), cashtag: value.props.value })],
+  ["bot_command", (value) => ({ type: value.kind, text: richText(value.props.children as Child), bot_command: value.props.command })],
+  ["anchor", (value) => ({ type: value.kind, name: value.props.name })],
+  ["anchor_link", (value) => ({ type: value.kind, text: richText(value.props.children as Child), anchor_name: value.props.name })],
+  ["reference", (value) => ({ type: value.kind, text: richText(value.props.children as Child), name: value.props.name })],
+  ["reference_link", (value) => ({ type: value.kind, text: richText(value.props.children as Child), reference_name: value.props.name })],
+]);
+
 function richText(child: Child): RichText {
   const parts: RichText[] = [];
   for (const item of flatten(child)) {
@@ -110,42 +137,9 @@ function richText(child: Child): RichText {
       else parts.push(value);
       continue;
     }
-    const text = () => richText(item.props.children as Child);
-    if (["bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript", "marked", "code"].includes(item.kind)) {
-      parts.push({ type: item.kind, text: text() });
-    } else if (item.kind === "date_time") {
-      parts.push({ type: item.kind, text: text(), unix_time: item.props.unixTime, date_time_format: item.props.format });
-    } else if (item.kind === "text_mention") {
-      parts.push({ type: item.kind, text: text(), user: item.props.user });
-    } else if (item.kind === "custom_emoji") {
-      parts.push({ type: item.kind, custom_emoji_id: item.props.id, alternative_text: item.props.alt });
-    } else if (item.kind === "mathematical_expression") {
-      parts.push({ type: item.kind, expression: item.props.expression });
-    } else if (item.kind === "url") {
-      parts.push({ type: item.kind, text: text(), url: item.props.url });
-    } else if (item.kind === "email_address") {
-      parts.push({ type: item.kind, text: text(), email_address: item.props.address });
-    } else if (item.kind === "phone_number") {
-      parts.push({ type: item.kind, text: text(), phone_number: item.props.number });
-    } else if (item.kind === "bank_card_number") {
-      parts.push({ type: item.kind, text: text(), bank_card_number: item.props.number });
-    } else if (item.kind === "mention") {
-      parts.push({ type: item.kind, text: text(), username: item.props.username });
-    } else if (item.kind === "hashtag" || item.kind === "cashtag") {
-      parts.push({ type: item.kind, text: text(), [item.kind]: item.props.value });
-    } else if (item.kind === "bot_command") {
-      parts.push({ type: item.kind, text: text(), bot_command: item.props.command });
-    } else if (item.kind === "anchor") {
-      parts.push({ type: item.kind, name: item.props.name });
-    } else if (item.kind === "anchor_link") {
-      parts.push({ type: item.kind, text: text(), anchor_name: item.props.name });
-    } else if (item.kind === "reference") {
-      parts.push({ type: item.kind, text: text(), name: item.props.name });
-    } else if (item.kind === "reference_link") {
-      parts.push({ type: item.kind, text: text(), reference_name: item.props.name });
-    } else {
-      throw new TypeError(`Expected rich text, received <${item.kind}>`);
-    }
+    const serializer = richTextSerializers.get(item.kind);
+    if (!serializer) throw new TypeError(`Expected rich text, received <${item.kind}>`);
+    parts.push(serializer(item));
   }
   return parts.length === 1 ? parts[0]! : parts;
 }
@@ -202,77 +196,118 @@ function tableCell(value: Node): Record<string, unknown> {
   return result;
 }
 
+type BlockSerializer = (value: Node) => InputRichBlock;
+
+function serializeTextBlock(value: Node): InputRichBlock {
+  return { type: value.kind, text: richText(value.props.children as Child) };
+}
+
+function serializeHeading(value: Node): InputRichBlock {
+  return { type: "heading", text: richText(value.props.children as Child), size: value.props.size };
+}
+
+function serializePre(value: Node): InputRichBlock {
+  const result: InputRichBlock = { type: "pre", text: richText(value.props.children as Child) };
+  setOptional(result, "language", value.props.language);
+  return result;
+}
+
+function serializeList(value: Node): InputRichBlock {
+  return { type: "list", items: childNodes(value.props.children as Child, "<List>").map(listItem) };
+}
+
+function serializeBlockQuote(value: Node): InputRichBlock {
+  const result: InputRichBlock = {
+    type: "blockquote",
+    blocks: childNodes(value.props.children as Child, "<BlockQuote>").map(block),
+  };
+  if (value.props.credit !== undefined) result.credit = richText(value.props.credit as Child);
+  return result;
+}
+
+function serializePullQuote(value: Node): InputRichBlock {
+  const result: InputRichBlock = { type: "pullquote", text: richText(value.props.children as Child) };
+  if (value.props.credit !== undefined) result.credit = richText(value.props.credit as Child);
+  return result;
+}
+
+function serializeBlockCollection(value: Node): InputRichBlock {
+  const result: InputRichBlock = {
+    type: value.kind,
+    blocks: childNodes(value.props.children as Child, `<${value.kind}>`).map(block),
+  };
+  setOptional(result, "caption", caption(value.props));
+  return result;
+}
+
+function serializeTable(value: Node): InputRichBlock {
+  const rows = childNodes(value.props.children as Child, "<Table>").map((row) => {
+    if (row.kind !== "table-row") throw new TypeError("<Table> only accepts <TableRow> children");
+    return childNodes(row.props.children as Child, "<TableRow>").map(tableCell);
+  });
+  const result: InputRichBlock = { type: "table", cells: rows };
+  if (value.props.bordered === true) result.is_bordered = true;
+  if (value.props.striped === true) result.is_striped = true;
+  if (value.props.caption !== undefined) result.caption = richText(value.props.caption as Child);
+  return result;
+}
+
+function serializeDetails(value: Node): InputRichBlock {
+  const result: InputRichBlock = {
+    type: "details",
+    summary: richText(value.props.summary as Child),
+    blocks: childNodes(value.props.children as Child, "<Details>").map(block),
+  };
+  if (value.props.open === true) result.is_open = true;
+  return result;
+}
+
+function serializeMap(value: Node): InputRichBlock {
+  const zoom = value.props.zoom as number;
+  const width = value.props.width as number;
+  const height = value.props.height as number;
+  if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24) throw new RangeError("<Map> zoom must be an integer from 0 to 24");
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0 || width + height > 10_000) {
+    throw new RangeError("<Map> width and height must be non-negative integers whose total does not exceed 10000");
+  }
+  if ((width === 0) !== (height === 0) || (width > 0 && Math.max(width / height, height / width) > 20)) {
+    throw new RangeError("<Map> width-to-height ratio must not exceed 20");
+  }
+  const result: InputRichBlock = { type: "map", location: value.props.location, zoom, width, height };
+  setOptional(result, "caption", caption(value.props));
+  return result;
+}
+
+function serializeMediaBlock(value: Node): InputRichBlock {
+  const result: InputRichBlock = { type: value.kind, [value.kind]: value.props.media };
+  setOptional(result, "caption", caption(value.props));
+  return result;
+}
+
+const blockSerializers = new globalThis.Map<string, BlockSerializer>([
+  ...["paragraph", "footer", "thinking"]
+    .map((kind): [string, BlockSerializer] => [kind, serializeTextBlock]),
+  ["heading", serializeHeading],
+  ["pre", serializePre],
+  ["divider", () => ({ type: "divider" })],
+  ["block-mathematical_expression", (value) => ({ type: "mathematical_expression", expression: value.props.expression })],
+  ["block-anchor", (value) => ({ type: "anchor", name: value.props.name })],
+  ["list", serializeList],
+  ["blockquote", serializeBlockQuote],
+  ["pullquote", serializePullQuote],
+  ["collage", serializeBlockCollection],
+  ["slideshow", serializeBlockCollection],
+  ["table", serializeTable],
+  ["details", serializeDetails],
+  ["map", serializeMap],
+  ...["animation", "audio", "photo", "video", "voice_note"]
+    .map((kind): [string, BlockSerializer] => [kind, serializeMediaBlock]),
+]);
+
 function block(value: Node): InputRichBlock {
-  const props = value.props;
-  if (["paragraph", "footer", "thinking"].includes(value.kind)) {
-    return { type: value.kind, text: richText(props.children as Child) };
-  }
-  if (value.kind === "heading") return { type: "heading", text: richText(props.children as Child), size: props.size };
-  if (value.kind === "pre") {
-    const result: InputRichBlock = { type: "pre", text: richText(props.children as Child) };
-    setOptional(result, "language", props.language);
-    return result;
-  }
-  if (value.kind === "divider") return { type: "divider" };
-  if (value.kind === "block-mathematical_expression") return { type: "mathematical_expression", expression: props.expression };
-  if (value.kind === "block-anchor") return { type: "anchor", name: props.name };
-  if (value.kind === "list") return { type: "list", items: childNodes(props.children as Child, "<List>").map(listItem) };
-  if (value.kind === "blockquote") {
-    const result: InputRichBlock = { type: "blockquote", blocks: childNodes(props.children as Child, "<BlockQuote>").map(block) };
-    if (props.credit !== undefined) result.credit = richText(props.credit as Child);
-    return result;
-  }
-  if (value.kind === "pullquote") {
-    const result: InputRichBlock = { type: "pullquote", text: richText(props.children as Child) };
-    if (props.credit !== undefined) result.credit = richText(props.credit as Child);
-    return result;
-  }
-  if (value.kind === "collage" || value.kind === "slideshow") {
-    const result: InputRichBlock = { type: value.kind, blocks: childNodes(props.children as Child, `<${value.kind}>`).map(block) };
-    setOptional(result, "caption", caption(props));
-    return result;
-  }
-  if (value.kind === "table") {
-    const rows = childNodes(props.children as Child, "<Table>").map((row) => {
-      if (row.kind !== "table-row") throw new TypeError("<Table> only accepts <TableRow> children");
-      return childNodes(row.props.children as Child, "<TableRow>").map(tableCell);
-    });
-    const result: InputRichBlock = { type: "table", cells: rows };
-    if (props.bordered === true) result.is_bordered = true;
-    if (props.striped === true) result.is_striped = true;
-    if (props.caption !== undefined) result.caption = richText(props.caption as Child);
-    return result;
-  }
-  if (value.kind === "details") {
-    const result: InputRichBlock = {
-      type: "details",
-      summary: richText(props.summary as Child),
-      blocks: childNodes(props.children as Child, "<Details>").map(block),
-    };
-    if (props.open === true) result.is_open = true;
-    return result;
-  }
-  if (value.kind === "map") {
-    const zoom = props.zoom as number;
-    const width = props.width as number;
-    const height = props.height as number;
-    if (!Number.isInteger(zoom) || zoom < 0 || zoom > 24) throw new RangeError("<Map> zoom must be an integer from 0 to 24");
-    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 0 || height < 0 || width + height > 10_000) {
-      throw new RangeError("<Map> width and height must be non-negative integers whose total does not exceed 10000");
-    }
-    if ((width === 0) !== (height === 0) || (width > 0 && Math.max(width / height, height / width) > 20)) {
-      throw new RangeError("<Map> width-to-height ratio must not exceed 20");
-    }
-    const result: InputRichBlock = { type: "map", location: props.location, zoom, width, height };
-    setOptional(result, "caption", caption(props));
-    return result;
-  }
-  if (["animation", "audio", "photo", "video", "voice_note"].includes(value.kind)) {
-    const result: InputRichBlock = { type: value.kind, [value.kind]: props.media };
-    setOptional(result, "caption", caption(props));
-    return result;
-  }
-  throw new TypeError(`Expected a rich-message block, received <${value.kind}>`);
+  const serializer = blockSerializers.get(value.kind);
+  if (!serializer) throw new TypeError(`Expected a rich-message block, received <${value.kind}>`);
+  return serializer(value);
 }
 
 export function render(element: Node): InputRichMessage {
