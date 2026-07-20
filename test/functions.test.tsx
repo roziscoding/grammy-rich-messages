@@ -10,33 +10,35 @@ import {
   table,
   tableCell,
   tableRow,
-  render,
+  expectRichMessage,
 } from "../src/index.js";
 
-test("functional builders compose a strictly nested rich message", () => {
+test("functional builders return canonical Telegram values without rendering", () => {
+  const formatted = bold("some", italic("text"), "here");
+  expect(JSON.parse(JSON.stringify(formatted))).toEqual({
+    type: "bold",
+    text: ["some", { type: "italic", text: "text" }, "here"],
+  });
+
   const message = richMessage(
     table(
       tableRow(
-        tableCell(
-          bold("some", italic("text"), "here"),
-        ),
+        tableCell(formatted),
       ),
     ),
   );
 
-  expect(render(message)).toEqual({
+  expect(JSON.parse(JSON.stringify(message))).toEqual({
     blocks: [{
       type: "table",
       cells: [[{
-        text: {
-          type: "bold",
-          text: ["some", { type: "italic", text: "text" }, "here"],
-        },
+        text: formatted,
         align: "left",
         valign: "top",
       }]],
     }],
   });
+  expect(expectRichMessage(message)).toBe(message);
 });
 
 test("JSX structural components delegate runtime validation to functional builders", () => {
@@ -55,7 +57,7 @@ test("JSX rich-text components delegate runtime validation to functional builder
   )).toThrow("bold() only accepts rich-text children");
 });
 
-test("JSX and functional syntax create the same canonical node tree", () => {
+test("JSX and functional syntax create the same canonical Telegram value", () => {
   const jsx = (
     <rm.RichMessage skipEntityDetection>
       <rm.Table bordered caption={<rm.Bold>Benchmark</rm.Bold>}>
@@ -87,7 +89,7 @@ test("JSX nodes can enter strict functional composition through runtime narrowin
     ),
   );
 
-  expect(rm.render(message).blocks[0]).toEqual({
+  expect(message.blocks[0]).toEqual({
     type: "table",
     cells: [[{ text: { type: "bold", text: "hybrid" }, align: "left", valign: "top" }]],
   });
@@ -98,6 +100,8 @@ test("functional builders enforce hierarchy at runtime for JavaScript and cast c
   expect(() => rm.tableRow(rm.paragraph("bad") as never)).toThrow("tableRow() only accepts <table-cell>");
   expect(() => rm.richMessage(rm.bold("bad") as never)).toThrow("richMessage() only accepts rich-message blocks");
   expect(() => rm.bold(rm.paragraph("bad") as never)).toThrow("bold() only accepts rich-text children");
+  expect(() => rm.richMessage(rm.inlineMath({ expression: "x" }) as never)).toThrow("richMessage() only accepts rich-message blocks");
+  expect(() => rm.bold(rm.blockAnchor({ name: "bad" }) as never)).toThrow("bold() only accepts rich-text children");
   expect(() => rm.list(rm.paragraph("bad") as never)).toThrow("list() only accepts <list-item>");
   expect(() => rm.expectTableRow(rm.paragraph("bad"))).toThrow("expectTableRow() only accepts <table-row>");
   expect(() => rm.expectRichText("plain text")).toThrow("expectRichText() expects a rich-text element");
@@ -123,7 +127,7 @@ test("functional rich-text builders cover every entity", () => {
     rm.referenceLink({ name: "note" }, "[1]"),
   ));
 
-  const first = rm.render(message).blocks[0];
+  const first = message.blocks[0];
   if (!first || first.type !== "paragraph" || !Array.isArray(first.text)) {
     throw new Error("expected functional rich-text output");
   }
@@ -144,7 +148,7 @@ test("functional block builders cover every block variant", () => {
   const video = { type: "video" as const, media: "video-id" };
   const voiceNote = { type: "voice_note" as const, media: "voice-id" };
 
-  const output = rm.render(rm.richMessage(
+  const output = rm.richMessage(
     { isRtl: true },
     rm.heading({ size: 2 }, "Heading"), rm.pre({ language: "ts" }, "code"), rm.footer("footer"),
     rm.divider(), rm.mathBlock({ expression: "x^2" }), rm.blockAnchor({ name: "intro" }),
@@ -157,7 +161,7 @@ test("functional block builders cover every block variant", () => {
     rm.map({ location: { latitude: 0, longitude: 0 }, zoom: 0, width: 0, height: 0 }),
     rm.animation({ media: animation }), rm.audio({ media: audio }), rm.photo({ media: photo }),
     rm.video({ media: video }), rm.voiceNote({ media: voiceNote }), rm.thinking("Thinking"),
-  ));
+  );
 
   expect(output.is_rtl).toBe(true);
   expect(output.blocks.map((block) => block.type)).toEqual([

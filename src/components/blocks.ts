@@ -34,9 +34,11 @@ import {
   voiceNote,
   type BlockInput,
   type CaptionOptions,
+  type ListItemInput,
   type ListItemOptions,
-  type NodeInput,
+  type TableCellInput,
   type TableOptions,
+  type TableRowInput,
 } from "../functions/blocks.js";
 import type { RichTextInput } from "../functions/text.js";
 import type { CaptionProps, ChildrenProps, ElementChildrenProps, NoChildrenProps } from "./shared.js";
@@ -47,9 +49,7 @@ function richChildren(children: Child): RichTextInput[] {
 function blockChildren(children: ElementChild): BlockInput[] {
   return children === undefined ? [] : [children as BlockInput];
 }
-function nodeChildren<K extends "list-item" | "table-row" | "table-cell">(children: ElementChild): NodeInput<K>[] {
-  return children === undefined ? [] : [children as NodeInput<K>];
-}
+
 function forbiddenChildren(children: unknown): never[] {
   return children === undefined ? [] : [children as never];
 }
@@ -69,7 +69,9 @@ export function MathBlock({ children, ...options }: { expression: string } & NoC
 export function BlockAnchor({ children, ...options }: { name: string } & NoChildrenProps) {
   return blockAnchor(options, ...forbiddenChildren(children));
 }
-export function List({ children }: ElementChildrenProps) { return list(...nodeChildren<"list-item">(children)); }
+export function List({ children }: ElementChildrenProps) {
+  return list(...(children === undefined ? [] : [children as ListItemInput]));
+}
 
 type ListItemSelectionProps =
   | { checkbox: true; checked?: boolean }
@@ -92,10 +94,10 @@ export function Slideshow({ children, ...options }: ElementChildrenProps & Capti
   return slideshow(options as CaptionOptions, ...blockChildren(children));
 }
 export function Table({ children, ...options }: ElementChildrenProps & { bordered?: boolean; striped?: boolean; caption?: Child }) {
-  return table(options as TableOptions, ...nodeChildren<"table-row">(children));
+  return table(options as TableOptions, ...(children === undefined ? [] : [children as TableRowInput]));
 }
 export function TableRow({ children }: ElementChildrenProps) {
-  return tableRow(...nodeChildren<"table-cell">(children));
+  return tableRow(...(children === undefined ? [] : [children as TableCellInput]));
 }
 export function TableCell({ children, ...options }: ChildrenProps & { header?: boolean; colspan?: number; rowspan?: number; align?: "left" | "center" | "right"; valign?: "top" | "middle" | "bottom" }) {
   return tableCell(options, ...richChildren(children));
@@ -124,6 +126,6 @@ export function VoiceNote({ children, ...options }: { media: InputMediaVoiceNote
 
 /**
  * A temporary “Thinking…” block. Telegram only permits this block in
- * sendRichMessageDraft payloads; render() cannot infer the eventual endpoint.
+ * sendRichMessageDraft payloads; the component cannot infer the eventual endpoint.
  */
 export function Thinking({ children }: ChildrenProps) { return thinking(...richChildren(children)); }

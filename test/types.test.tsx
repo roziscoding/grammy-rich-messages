@@ -5,14 +5,15 @@ import {
   Paragraph,
   RichMessage,
   Table,
-  render,
+  expectRichMessage,
   type InputMediaPhoto,
   type InputRichMessage,
   type InputRichBlockParagraph,
+  type InputRichBlockPhoto,
   type InputRichBlockTable,
   type MessageEntity,
-  type Node,
   type RichBlockTableCell,
+  type TableRowValue,
 } from "../src/index.js";
 
 function expectType<T>(_value: T): void {}
@@ -64,9 +65,13 @@ function typeSafetyAssertions(): void {
   // @ts-expect-error structural containers do not accept raw text.
   <Table>not a row</Table>;
 
-  const functionalRow: Node<"table-row"> = rm.tableRow(rm.tableCell(rm.bold("typed")));
+  const functionalRow: TableRowValue = rm.tableRow(rm.tableCell(rm.bold("typed")));
   expectType<ReturnType<typeof rm.tableRow>>(functionalRow);
   rm.table(functionalRow);
+
+  expectType<InputRichBlockParagraph>(rm.paragraph("canonical block"));
+  expectType<InputRichBlockPhoto>(rm.photo({ media: { type: "photo", media: "photo-id" } }));
+  expectType<InputRichMessage>(rm.richMessage(rm.paragraph("canonical message")));
 
   // @ts-expect-error functional table composition only accepts table-row nodes.
   rm.table(rm.paragraph("not a row"));
@@ -76,6 +81,10 @@ function typeSafetyAssertions(): void {
   rm.richMessage(rm.bold("not a block"));
   // @ts-expect-error rich-text builders reject block nodes.
   rm.bold(rm.paragraph("not rich text"));
+  // @ts-expect-error inline math and block math have the same wire shape but distinct categories.
+  rm.richMessage(rm.inlineMath({ expression: "x" }));
+  // @ts-expect-error text anchors and block anchors have the same wire shape but distinct categories.
+  rm.bold(rm.blockAnchor({ name: "not-inline" }));
 
   const functionalInsideJsx = <Table>{functionalRow}</Table>;
   const jsxRow = <rm.TableRow><rm.TableCell>guarded</rm.TableCell></rm.TableRow>;
@@ -84,7 +93,7 @@ function typeSafetyAssertions(): void {
   rm.table(rm.expectTableRow(jsxRow));
   void functionalInsideJsx;
 
-  const output = render(<RichMessage><Paragraph>Hello</Paragraph></RichMessage>);
+  const output = expectRichMessage(<RichMessage><Paragraph>Hello</Paragraph></RichMessage>);
   const first = output.blocks[0]!;
 
   if (first.type === "table") {

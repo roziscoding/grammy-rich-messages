@@ -5,9 +5,6 @@ function richChildren(children) {
 function blockChildren(children) {
     return children === undefined ? [] : [children];
 }
-function nodeChildren(children) {
-    return children === undefined ? [] : [children];
-}
 function forbiddenChildren(children) {
     return children === undefined ? [] : [children];
 }
@@ -26,7 +23,9 @@ export function MathBlock({ children, ...options }) {
 export function BlockAnchor({ children, ...options }) {
     return blockAnchor(options, ...forbiddenChildren(children));
 }
-export function List({ children }) { return list(...nodeChildren(children)); }
+export function List({ children }) {
+    return list(...(children === undefined ? [] : [children]));
+}
 export function ListItem({ children, ...options }) {
     return listItem(options, ...blockChildren(children));
 }
@@ -45,10 +44,10 @@ export function Slideshow({ children, ...options }) {
     return slideshow(options, ...blockChildren(children));
 }
 export function Table({ children, ...options }) {
-    return table(options, ...nodeChildren(children));
+    return table(options, ...(children === undefined ? [] : [children]));
 }
 export function TableRow({ children }) {
-    return tableRow(...nodeChildren(children));
+    return tableRow(...(children === undefined ? [] : [children]));
 }
 export function TableCell({ children, ...options }) {
     return tableCell(options, ...richChildren(children));
@@ -76,7 +75,7 @@ export function VoiceNote({ children, ...options }) {
 }
 /**
  * A temporary “Thinking…” block. Telegram only permits this block in
- * sendRichMessageDraft payloads; render() cannot infer the eventual endpoint.
+ * sendRichMessageDraft payloads; the component cannot infer the eventual endpoint.
  */
 export function Thinking({ children }) { return thinking(...richChildren(children)); }
 //# sourceMappingURL=blocks.js.map

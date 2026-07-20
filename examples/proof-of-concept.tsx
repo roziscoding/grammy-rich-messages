@@ -6,10 +6,10 @@ import {
   ListItem,
   Paragraph,
   RichMessage,
-  render,
+  expectRichMessage,
 } from "telegram-rich-messages";
 
-export const proofOfConcept = render(
+export const proofOfConcept = expectRichMessage(
   <RichMessage skipEntityDetection>
     <Heading size={1}>Build report</Heading>
     <Paragraph>Status: <Bold>green</Bold>.</Paragraph>

@@ -1,118 +1,76 @@
-import type { BlockNodeKind, Child, ElementChild, Node, NodeKind, RichTextNodeKind } from "../jsx-runtime.js";
+import type { RichBlockCaption, RichText } from "../types.js";
+import { kindOf, type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../values.js";
 
 export type OptionalNested<T> = T | boolean | null | undefined | readonly OptionalNested<T>[];
-export type RichTextInput = OptionalNested<string | number | Node<RichTextNodeKind>>;
-export type BlockInput = OptionalNested<Node<BlockNodeKind>>;
-export type NodeInput<K extends NodeKind> = OptionalNested<Node<K>>;
+export type RichTextInput = OptionalNested<string | number | RichTextValue>;
+export type BlockInput = OptionalNested<BlockValue>;
+export type ListItemInput = OptionalNested<ListItemValue>;
+export type TableCellInput = OptionalNested<TableCellValue>;
+export type TableRowInput = OptionalNested<TableRowValue>;
 
-const richTextKinds = new globalThis.Set<RichTextNodeKind>([
-  "bold", "italic", "underline", "strikethrough", "spoiler", "subscript", "superscript",
-  "marked", "code", "date_time", "text_mention", "custom_emoji", "mathematical_expression",
-  "url", "email_address", "phone_number", "bank_card_number", "mention", "hashtag", "cashtag",
-  "bot_command", "anchor", "anchor_link", "reference", "reference_link",
-]);
-
-const blockKinds = new globalThis.Set<BlockNodeKind>([
-  "paragraph", "footer", "thinking", "heading", "pre", "divider", "block-mathematical_expression",
-  "block-anchor", "list", "blockquote", "pullquote", "collage", "slideshow", "table", "details",
-  "map", "animation", "audio", "photo", "video", "voice_note",
-]);
-
-function flattenInputs(values: readonly unknown[]): unknown[] {
+export function flattenInputs(values: readonly unknown[]): unknown[] {
   return values.flatMap((value): unknown[] => Array.isArray(value) ? flattenInputs(value) : [value]);
 }
 
-function isNode(value: unknown): value is Node {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    && typeof (value as { kind?: unknown }).kind === "string"
-    && typeof (value as { props?: unknown }).props === "object"
-    && (value as { props?: unknown }).props !== null;
-}
-
 function describe(value: unknown): string {
-  if (isNode(value)) return `<${value.kind}>`;
+  const kind = kindOf(value);
+  if (kind !== undefined) return `<${kind}>`;
+  if (typeof value === "object" && value !== null && "type" in value) return `<${String((value as { type: unknown }).type)}>`;
   if (typeof value === "string") return JSON.stringify(value);
   if (value === undefined) return "undefined";
   try { return JSON.stringify(value); } catch { return String(value); }
 }
 
-export function assertBlockChildren(children: readonly unknown[], context: string): void {
-  for (const child of flattenInputs(children)) {
-    if (child == null || typeof child === "boolean") continue;
-    if (!isNode(child) || !blockKinds.has(child.kind as BlockNodeKind)) {
-      throw new TypeError(`${context} only accepts rich-message blocks, received ${describe(child)}`);
+export function richText(values: readonly unknown[], context: string): RichText {
+  const parts: RichText[] = [];
+  for (const item of flattenInputs(values)) {
+    if (item == null || typeof item === "boolean") continue;
+    if (typeof item === "string" || typeof item === "number") {
+      const text = String(item);
+      const last = parts.at(-1);
+      if (typeof last === "string") parts[parts.length - 1] = last + text;
+      else parts.push(text);
+      continue;
     }
-  }
-}
-
-export function assertRichTextNode(value: unknown, context: string): asserts value is Node<RichTextNodeKind> {
-  if (!isNode(value) || !richTextKinds.has(value.kind as RichTextNodeKind)) {
-    throw new TypeError(`${context} expects a rich-text element, received ${describe(value)}`);
-  }
-}
-
-export function assertBlockNode(value: unknown, context: string): asserts value is Node<BlockNodeKind> {
-  if (!isNode(value) || !blockKinds.has(value.kind as BlockNodeKind)) {
-    throw new TypeError(`${context} expects a rich-message block, received ${describe(value)}`);
-  }
-}
-
-export function assertRichText(children: readonly unknown[], context: string): void {
-  for (const child of flattenInputs(children)) {
-    if (child == null || typeof child === "boolean" || typeof child === "string" || typeof child === "number") continue;
-    if (!isNode(child) || !richTextKinds.has(child.kind as RichTextNodeKind)) {
-      throw new TypeError(`${context} only accepts rich-text children, received ${describe(child)}`);
+    if (kindOf(item) !== "rich-text") {
+      throw new TypeError(`${context} only accepts rich-text children, received ${describe(item)}`);
     }
+    parts.push(item as RichTextValue);
   }
+  return parts.length === 1 ? parts[0]! : parts;
 }
 
-export function assertExactNodeKind<K extends NodeKind>(
-  value: unknown,
-  kind: K,
-  context: string,
-): asserts value is Node<K> {
-  if (!isNode(value) || value.kind !== kind) {
-    throw new TypeError(`${context} only accepts <${kind}> children, received ${describe(value)}`);
+function collectBranded<T>(values: readonly unknown[], kind: string, context: string): T[] {
+  const result: T[] = [];
+  for (const item of flattenInputs(values)) {
+    if (item == null || typeof item === "boolean") continue;
+    if (typeof item === "string" && item.trim() === "") continue;
+    if (kindOf(item) !== kind) throw new TypeError(`${context} only accepts <${kind}> children, received ${describe(item)}`);
+    result.push(item as T);
   }
+  return result;
 }
 
-export function assertNodeKind<K extends NodeKind>(children: readonly unknown[], kind: K, context: string): void {
-  for (const child of flattenInputs(children)) {
-    if (child == null || typeof child === "boolean") continue;
-    if (!isNode(child) || child.kind !== kind) {
-      throw new TypeError(`${context} only accepts <${kind}> children, received ${describe(child)}`);
+export function blocks(values: readonly unknown[], context: string): BlockValue[] {
+  if (context === "richMessage()") {
+    const result: BlockValue[] = [];
+    for (const item of flattenInputs(values)) {
+      if (item == null || typeof item === "boolean") continue;
+      if (kindOf(item) !== "block") throw new TypeError("richMessage() only accepts rich-message blocks");
+      result.push(item as BlockValue);
     }
+    return result;
   }
+  return collectBranded<BlockValue>(values, "block", context);
 }
-
-export function childrenProps(children: readonly Child[]): { children?: Child } {
-  if (children.length === 0) return {};
-  return { children: children.length === 1 ? children[0] : children };
+export function listItems(values: readonly unknown[], context: string): ListItemValue[] {
+  return collectBranded<ListItemValue>(values, "list-item", context);
 }
-
-export function elementChildrenProps(children: readonly ElementChild[]): { children?: ElementChild } {
-  if (children.length === 0) return {};
-  return { children: children.length === 1 ? children[0] : children };
+export function tableRows(values: readonly unknown[], context: string): TableRowValue[] {
+  return collectBranded<TableRowValue>(values, "table-row", context);
 }
-
-export function isOptions(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value) && !isNode(value);
-}
-
-export function splitOptions<P extends object, C>(
-  first: P | C | undefined,
-  rest: readonly C[],
-  context: string,
-  allowedKeys: readonly string[],
-): readonly [P | undefined, readonly C[]] {
-  if (isOptions(first)) {
-    const allowed = new Set(allowedKeys);
-    for (const key of Object.keys(first)) {
-      if (!allowed.has(key)) throw new TypeError(`${context} received unknown option ${JSON.stringify(key)}`);
-    }
-    return [first as P, rest];
-  }
-  return [undefined, first === undefined ? rest : [first as C, ...rest]];
+export function tableCells(values: readonly unknown[], context: string): TableCellValue[] {
+  return collectBranded<TableCellValue>(values, "table-cell", context);
 }
 
 export function assertNoChildren(children: readonly unknown[], context: string): void {
@@ -120,10 +78,37 @@ export function assertNoChildren(children: readonly unknown[], context: string):
   if (meaningful.length > 0) throw new TypeError(`${context} does not accept children`);
 }
 
-export function assertCaption(options: { caption?: unknown; credit?: unknown }, context: string): void {
-  if (options.caption === undefined && options.credit !== undefined) {
-    throw new TypeError(`${context} credit requires caption text`);
+function isPossibleInput(value: unknown, category: string, allowPrimitive: boolean): boolean {
+  if (value == null || typeof value === "boolean" || Array.isArray(value)) return true;
+  if (allowPrimitive && (typeof value === "string" || typeof value === "number")) return true;
+  return kindOf(value) !== undefined;
+}
+
+export function splitOptions<P extends object, C>(
+  first: P | C | undefined,
+  rest: readonly C[],
+  context: string,
+  allowedKeys: readonly string[],
+  childCategory: "rich-text" | "block" | "list-item" | "table-cell" | "table-row",
+  allowPrimitive = false,
+): readonly [P | undefined, readonly C[]] {
+  if (first === undefined) return [undefined, rest];
+  if (isPossibleInput(first, childCategory, allowPrimitive)) return [undefined, [first as C, ...rest]];
+  if (typeof first !== "object" || first === null) return [undefined, [first as C, ...rest]];
+  const allowed = new Set(allowedKeys);
+  for (const key of Object.keys(first)) {
+    if (!allowed.has(key)) throw new TypeError(`${context} received unknown option ${JSON.stringify(key)}`);
   }
-  if (options.caption !== undefined) assertRichText([options.caption], `${context} caption`);
-  if (options.credit !== undefined) assertRichText([options.credit], `${context} credit`);
+  return [first as P, rest];
+}
+
+export function caption(options: { caption?: unknown; credit?: unknown }, context: string): RichBlockCaption | undefined {
+  if (options.caption === undefined) {
+    if (options.credit !== undefined) throw new TypeError(`${context} credit requires caption text`);
+    return undefined;
+  }
+  return {
+    text: richText([options.caption], `${context} caption`),
+    ...(options.credit === undefined ? {} : { credit: richText([options.credit], `${context} credit`) }),
+  };
 }

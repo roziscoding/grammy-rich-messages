@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { List, ListItem, Map, Paragraph, Photo, RichMessage, render } from "../src/index.js";
+import { List, ListItem, Map, Paragraph, Photo, RichMessage, expectRichMessage } from "../src/index.js";
 
 const photo = { type: "photo" as const, media: "photo-file-id" };
 
@@ -9,33 +9,33 @@ if (false) {
 }
 
 test("rejects compositions that cannot be sent as InputRichMessage", () => {
-  expect(() => render(<Paragraph>not a root</Paragraph>)).toThrow("<RichMessage> root");
-  expect(() => render(RichMessage({ children: "plain text at block level" } as any))).toThrow("only accepts rich-message blocks");
-  expect(() => render(
+  expect(() => expectRichMessage(<Paragraph>not a root</Paragraph>)).toThrow("<RichMessage> root");
+  expect(() => expectRichMessage(RichMessage({ children: "plain text at block level" } as any))).toThrow("only accepts rich-message blocks");
+  expect(() => expectRichMessage(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={25} width={100} height={100} />
     </RichMessage>,
   )).toThrow("zoom");
-  expect(() => render(
+  expect(() => expectRichMessage(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={10} width={9500} height={600} />
     </RichMessage>,
   )).toThrow("width and height");
-  expect(() => render(
+  expect(() => expectRichMessage(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={10} width={1000} height={20} />
     </RichMessage>,
   )).toThrow("ratio");
-  expect(() => render(
+  expect(() => expectRichMessage(
     <RichMessage>{Photo({ media: photo, credit: "Unattached credit" } as any)}</RichMessage>,
   )).toThrow("credit requires caption");
-  expect(() => render(
+  expect(() => expectRichMessage(
     <RichMessage><List>{ListItem({ checked: true } as any)}</List></RichMessage>,
   )).toThrow("checked requires checkbox");
 });
 
 test("accepts the documented zero boundary for map dimensions", () => {
-  expect(render(
+  expect(expectRichMessage(
     <RichMessage>
       <Map location={{ latitude: 0, longitude: 0 }} zoom={0} width={0} height={0} />
     </RichMessage>,

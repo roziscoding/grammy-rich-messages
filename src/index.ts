@@ -5,14 +5,5 @@ export * from "./functions/blocks.js";
 export * from "./functions/guards.js";
 export * from "./functions/message.js";
 export * from "./functions/text.js";
-export type {
-  BlockNodeKind,
-  Child,
-  ElementChild,
-  Node,
-  NodeKind,
-  NodePropsByKind,
-  RichTextNodeKind,
-} from "./jsx-runtime.js";
-export { render } from "./render.js";
+export type { BlockValue, ListItemValue, RichMessageValue, RichTextValue, TableCellValue, TableRowValue } from "./values.js";
 export type * from "./types.js";

@@ -1,6 +1,6 @@
 # telegram-rich-messages
 
-Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, TSX, or both. `render()` returns a plain `InputRichMessage` object.
+Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, TSX, or both. Builders produce the canonical Telegram objects directly.
 
 - No React or virtual DOM
 - No Bot API client or bot framework
@@ -10,9 +10,9 @@ Build [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-m
 
 ## Usage
 
-The API can be used with functional builders or TSX. Both forms create the same node tree, use the same runtime validation, and can be mixed in one message.
+The API can be used with functional builders or TSX. Both forms create the same canonical values, use the same runtime validation, and can be mixed in one message.
 
-- **[Functional API](#functional-api):** provides the strongest TypeScript guarantees because each builder preserves its exact node kind, allowing invalid nesting to be caught at compile time. Deeply nested messages, however, can be harder to scan.
+- **[Functional API](#functional-api):** provides the strongest TypeScript guarantees because each builder preserves its exact value category, allowing invalid nesting to be caught at compile time. Deeply nested messages, however, can be harder to scan.
 - **[TSX](#tsx):** mirrors the message structure and works naturally with arrays, conditions, fragments, and custom components. TypeScript widens JSX expressions to `JSX.Element`, so parent-child hierarchy is checked at runtime instead of compile time.
 
 ### Functional API
@@ -22,14 +22,13 @@ import {
   bold,
   heading,
   paragraph,
-  render,
   richMessage,
   table,
   tableCell,
   tableRow,
 } from "telegram-rich-messages";
 
-const message = richMessage(
+const input = richMessage(
   heading({ size: 1 }, "Build report"),
   paragraph("Status: ", bold("green")),
   table(
@@ -44,11 +43,9 @@ const message = richMessage(
     ),
   ),
 );
-
-const input = render(message);
 ```
 
-Builders preserve their node kind, so TypeScript checks the hierarchy:
+Builders preserve their value category, so TypeScript checks the hierarchy:
 
 ```ts
 table(tableRow(tableCell("valid"))); // valid
@@ -82,10 +79,10 @@ import {
   Table,
   TableCell,
   TableRow,
-  render,
+  expectRichMessage,
 } from "telegram-rich-messages";
 
-const input = render(
+const input = expectRichMessage(
   <RichMessage skipEntityDetection>
     <Heading size={1}>Build report</Heading>
     <Paragraph>Status: <Bold>green</Bold></Paragraph>
@@ -141,6 +138,7 @@ Available guards:
 - `expectListItem`
 - `expectTableRow`
 - `expectTableCell`
+- `expectRichMessage`
 
 ## API
 
@@ -156,9 +154,9 @@ Every TSX component has a lower-camel-case builder.
 | Styling | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code` | `bold`, `italic`, `underline`, `strikethrough`, `spoiler`, `subscript`, `superscript`, `marked`, `code` |
 | Entities | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` | `dateTime`, `textMention`, `customEmoji`, `inlineMath`, `link`, `email`, `phone`, `bankCard`, `mention`, `hashtag`, `cashtag`, `botCommand`, `textAnchor`, `anchorLink`, `reference`, `referenceLink` |
 
-Props use camelCase. `render()` converts them to the Bot API's snake_case fields.
+Props use camelCase. Builders immediately produce the Bot API's snake_case fields.
 
-Public AST types include `Node`, `NodeKind`, `NodePropsByKind`, `BlockNodeKind`, `RichTextNodeKind`, `Child`, and `ElementChild`.
+Public composition types include `RichTextValue`, `BlockValue`, `ListItemValue`, `TableCellValue`, `TableRowValue`, and `RichMessageValue`.
 
 ## Development
 
@@ -171,7 +169,7 @@ bun run check
 
 ## Scope
 
-This package only builds and renders rich-message objects. Authentication, HTTP calls, retries, webhooks, and polling belong to the consuming application.
+This package only builds rich-message objects. Authentication, HTTP calls, retries, webhooks, and polling belong to the consuming application.
 
 ## License
 

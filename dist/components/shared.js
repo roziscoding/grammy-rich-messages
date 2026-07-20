@@ -1,2 +1,2 @@
-export { node } from "../node.js";
+export {};
 //# sourceMappingURL=shared.js.map

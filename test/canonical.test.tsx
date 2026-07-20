@@ -27,18 +27,18 @@ import {
   TextAnchor,
   TextMention,
   Underline,
-  render,
+  expectRichMessage,
 } from "../src/index.js";
 
-describe("render", () => {
+describe("expectRichMessage", () => {
   test("composes text blocks and nested rich text from TSX", () => {
-    const output = render(
+    const output = expectRichMessage(
       <RichMessage skipEntityDetection>
         <Paragraph>Hello, <Bold>Telegram</Bold>!</Paragraph>
       </RichMessage>,
     );
 
-    expect(output).toEqual({
+    expect(JSON.parse(JSON.stringify(output))).toEqual({
       blocks: [
         {
           type: "paragraph",
@@ -49,9 +49,9 @@ describe("render", () => {
     });
   });
 
-  test("serializes every rich-text entity with Bot API field names", () => {
+  test("builds every rich-text entity with Bot API field names", () => {
     const user = { id: 42, is_bot: false, first_name: "Ada" };
-    const output = render(
+    const output = expectRichMessage(
       <RichMessage>
         <Paragraph>
           <Italic>i</Italic><Underline>u</Underline><Strikethrough>s</Strikethrough>

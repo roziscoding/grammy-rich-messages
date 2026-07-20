@@ -1,25 +1,21 @@
-import type { BlockNodeKind, Child, ElementChild, Node, NodeKind, RichTextNodeKind } from "../jsx-runtime.js";
+import type { RichBlockCaption, RichText } from "../types.js";
+import { type BlockValue, type ListItemValue, type RichTextValue, type TableCellValue, type TableRowValue } from "../values.js";
 export type OptionalNested<T> = T | boolean | null | undefined | readonly OptionalNested<T>[];
-export type RichTextInput = OptionalNested<string | number | Node<RichTextNodeKind>>;
-export type BlockInput = OptionalNested<Node<BlockNodeKind>>;
-export type NodeInput<K extends NodeKind> = OptionalNested<Node<K>>;
-export declare function assertBlockChildren(children: readonly unknown[], context: string): void;
-export declare function assertRichTextNode(value: unknown, context: string): asserts value is Node<RichTextNodeKind>;
-export declare function assertBlockNode(value: unknown, context: string): asserts value is Node<BlockNodeKind>;
-export declare function assertRichText(children: readonly unknown[], context: string): void;
-export declare function assertExactNodeKind<K extends NodeKind>(value: unknown, kind: K, context: string): asserts value is Node<K>;
-export declare function assertNodeKind<K extends NodeKind>(children: readonly unknown[], kind: K, context: string): void;
-export declare function childrenProps(children: readonly Child[]): {
-    children?: Child;
-};
-export declare function elementChildrenProps(children: readonly ElementChild[]): {
-    children?: ElementChild;
-};
-export declare function isOptions(value: unknown): value is Record<string, unknown>;
-export declare function splitOptions<P extends object, C>(first: P | C | undefined, rest: readonly C[], context: string, allowedKeys: readonly string[]): readonly [P | undefined, readonly C[]];
+export type RichTextInput = OptionalNested<string | number | RichTextValue>;
+export type BlockInput = OptionalNested<BlockValue>;
+export type ListItemInput = OptionalNested<ListItemValue>;
+export type TableCellInput = OptionalNested<TableCellValue>;
+export type TableRowInput = OptionalNested<TableRowValue>;
+export declare function flattenInputs(values: readonly unknown[]): unknown[];
+export declare function richText(values: readonly unknown[], context: string): RichText;
+export declare function blocks(values: readonly unknown[], context: string): BlockValue[];
+export declare function listItems(values: readonly unknown[], context: string): ListItemValue[];
+export declare function tableRows(values: readonly unknown[], context: string): TableRowValue[];
+export declare function tableCells(values: readonly unknown[], context: string): TableCellValue[];
 export declare function assertNoChildren(children: readonly unknown[], context: string): void;
-export declare function assertCaption(options: {
+export declare function splitOptions<P extends object, C>(first: P | C | undefined, rest: readonly C[], context: string, allowedKeys: readonly string[], childCategory: "rich-text" | "block" | "list-item" | "table-cell" | "table-row", allowPrimitive?: boolean): readonly [P | undefined, readonly C[]];
+export declare function caption(options: {
     caption?: unknown;
     credit?: unknown;
-}, context: string): void;
+}, context: string): RichBlockCaption | undefined;
 //# sourceMappingURL=shared.d.ts.map

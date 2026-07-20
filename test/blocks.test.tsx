@@ -3,7 +3,7 @@ import {
   Animation, Audio, BlockAnchor, BlockQuote, Bold, Collage, Details, Divider,
   Footer, Heading, List, ListItem, Map, MathBlock, Paragraph, Photo, Pre,
   PullQuote, RichMessage, Slideshow, Table, TableCell, TableRow, Thinking,
-  Video, VoiceNote, render,
+  Video, VoiceNote, expectRichMessage,
 } from "../src/index.js";
 
 const photo = { type: "photo" as const, media: "photo-file-id", has_spoiler: true };
@@ -12,8 +12,8 @@ const animation = { type: "animation" as const, media: "animation-file-id" };
 const audio = { type: "audio" as const, media: "audio-file-id", title: "Song" };
 const voiceNote = { type: "voice_note" as const, media: "voice-file-id" };
 
-test("serializes every InputRichBlock variant", () => {
-  const output = render(
+test("builds every InputRichBlock variant", () => {
+  const output = expectRichMessage(
     <RichMessage isRtl>
       <Heading size={2}>Title</Heading>
       <Pre language="ts">const answer = 42;</Pre>
