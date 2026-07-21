@@ -199,7 +199,11 @@ TypeScript widens JSX expressions to `JSX.Element`, so a JSX value entering a st
 
 ```tsx
 import { table } from "grammy-rich-messages/core";
-import { expectTableRow, TableCell, TableRow } from "grammy-rich-messages/components";
+import {
+    expectTableRow,
+    TableCell,
+    TableRow,
+} from "grammy-rich-messages/components";
 
 const row = (
     <TableRow>
@@ -214,22 +218,22 @@ The guards — `expectRichText`, `expectBlock`, `expectListItem`, `expectTableRo
 
 ## Entrypoints
 
-| Entrypoint                       | Exports                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------- |
-| `grammy-rich-messages/core`      | Functional builders, the `richMessage` root, and the Telegram types           |
-| `grammy-rich-messages/components`| TSX components, the `richMessage` root, and narrowing guards                   |
-| `grammy-rich-messages/chaining`  | `RichMessage`, `TableBuilder`, and `TableRowBuilder`                          |
+| Entrypoint                        | Exports                                                             |
+| --------------------------------- | ------------------------------------------------------------------- |
+| `grammy-rich-messages/core`       | Functional builders, the `richMessage` root, and the Telegram types |
+| `grammy-rich-messages/components` | TSX components, the `richMessage` root, and narrowing guards        |
+| `grammy-rich-messages/chaining`   | `RichMessage`, `TableBuilder`, and `TableRowBuilder`                |
 
 Every TSX component has a lower-camel-case builder in `core`. `core` exports a strict `richMessage` that only accepts block values, so invalid children fail at compile time; `components` exports one that also accepts `JSX.Element` children and validates at runtime. Both return the same value.
 
-| Category    | Components / functions                                                                                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root        | `richMessage`                                                                                                                                                          |
-| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                |
-| Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                        |
-| Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                        |
-| Media       | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote`                                                                                                                    |
-| Styling     | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code`                                                                |
+| Category    | Components / functions                                                                                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root        | `richMessage`                                                                                                                                                                                         |
+| Text blocks | `Paragraph`, `Heading`, `Pre`, `Footer`                                                                                                                                                               |
+| Structure   | `Divider`, `MathBlock`, `BlockAnchor`, `List`, `ListItem`, `BlockQuote`, `PullQuote`, `Details`                                                                                                       |
+| Layout      | `Collage`, `Slideshow`, `Table`, `TableRow`, `TableCell`, `Map`                                                                                                                                       |
+| Media       | `Animation`, `Audio`, `Photo`, `Video`, `VoiceNote`                                                                                                                                                   |
+| Styling     | `Bold`, `Italic`, `Underline`, `Strikethrough`, `Spoiler`, `Subscript`, `Superscript`, `Marked`, `Code`                                                                                               |
 | Entities    | `DateTime`, `TextMention`, `CustomEmoji`, `InlineMath`, `Link`, `Email`, `Phone`, `BankCard`, `Mention`, `Hashtag`, `Cashtag`, `BotCommand`, `TextAnchor`, `AnchorLink`, `Reference`, `ReferenceLink` |
 
 Props use camelCase; builders emit the Bot API's snake_case fields immediately. Media builders take a Telegram `InputMedia` payload whose `media` field accepts a `file_id`/URL string or an upload (grammY's `InputFile`).
