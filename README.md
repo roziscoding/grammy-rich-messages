@@ -4,7 +4,7 @@ This library builds [Telegram Bot API rich messages](https://core.telegram.org/b
 
 With this library, you can:
 
-- Compose rich messages with typed **functions**, a **chaining** builder, **TSX**, or any mix of the three
+- Compose rich messages with typed **[functions](#functional)**, a **[chaining](#chaining)** builder, **[TSX](#tsx)**, or any mix of the three
 - Get compile-time hierarchy checks — invalid nesting (a paragraph where a table row belongs) is a type error
 - Rely on runtime validation for JavaScript, casts, and TSX composition, where the compiler can't help
 - Cover every rich-message block and rich-text entity in `grammy/types`
@@ -17,17 +17,37 @@ It is built directly on grammY's own [`grammy/types`](https://grammy.dev), so bu
 npm i grammy-rich-messages
 ```
 
-On Deno, import from `deno.land/x`:
+`grammy` is a peer dependency; install it alongside this library when sending messages through a bot.
+
+### Deno
+
+On Deno, import from `denopkg.com`:
 
 ```ts
-import { richMessage } from "https://deno.land/x/grammy_rich_messages/core.ts";
+import { richMessage } from "https://denopkg.com/roziscoding/grammy-rich-messages/src/core.ts";
 ```
 
-`grammy` is a peer dependency; install it alongside this library when sending messages through a bot.
+If you prefer package-style specifiers, add optional aliases for the surfaces you use in `deno.jsonc`:
+
+```jsonc
+{
+    "imports": {
+        "grammy-rich-messages/core": "https://denopkg.com/roziscoding/grammy-rich-messages/src/core.ts",
+        "grammy-rich-messages/components": "https://denopkg.com/roziscoding/grammy-rich-messages/src/components.ts",
+        "grammy-rich-messages/chaining": "https://denopkg.com/roziscoding/grammy-rich-messages/src/chaining.ts"
+    }
+}
+```
+
+```ts
+import { richMessage } from "grammy-rich-messages/core";
+```
+
+The examples below use these package-style specifiers; on Deno, either add the matching aliases or import the `src/` entrypoints directly from `denopkg.com`.
 
 ## Quickstart
 
-This library only builds the message object. grammY already exposes the Bot API's `ctx.replyWithRichMessage`, so composing and sending stay separate — compose with any of the APIs below, then hand the result to grammY:
+This library only builds the message object. grammY already exposes the Bot API's `ctx.replyWithRichMessage`, so composing and sending stay separate — compose with any of the [APIs below](#the-three-apis), then hand the result to grammY:
 
 ```tsx
 import { Bot } from "grammy";
@@ -47,7 +67,7 @@ bot.command("start", (ctx) =>
 bot.start();
 ```
 
-`richMessage` is the message root. Give it blocks — from functions, TSX, or a mix — and it returns an `InputRichMessage` ready to send; hand it an already-composed rich message and it validates and returns it unchanged. A `RichMessage` chaining instance can be passed to `ctx.replyWithRichMessage` directly. The result is a plain `grammy/types` value, so it also works with any other Bot API client.
+`richMessage` is the message root. Give it blocks — from [functions](#functional), [TSX](#tsx), or a mix — and it returns an `InputRichMessage` ready to send; hand it an already-composed rich message and it validates and returns it unchanged. A [`RichMessage` chaining](#chaining) instance can be passed to `ctx.replyWithRichMessage` directly. The result is a plain `grammy/types` value, so it also works with any other Bot API client.
 
 See [`examples/bot.tsx`](./examples/bot.tsx) for the same handler written with all three APIs.
 
@@ -133,7 +153,7 @@ A `RichMessage` instance `implements InputRichMessage`, so it goes straight to g
 
 ### TSX
 
-Point TypeScript at the library's JSX runtime — no React required:
+Point TypeScript at the library's JSX runtime — no React required.
 
 ```json
 {
@@ -144,7 +164,17 @@ Point TypeScript at the library's JSX runtime — no React required:
 }
 ```
 
-`jsxImportSource` only tells the compiler where the JSX runtime lives; the components themselves come from `grammy-rich-messages/components`:
+For Deno, add the JSX runtime import alias so the compiler can resolve `jsxImportSource`:
+
+```jsonc
+{
+    "imports": {
+        "grammy-rich-messages/jsx/jsx-runtime": "https://denopkg.com/roziscoding/grammy-rich-messages/src/components/jsx-runtime.ts"
+    }
+}
+```
+
+`jsxImportSource` only tells the compiler where the JSX runtime lives; the components themselves come from `grammy-rich-messages/components`, or `https://denopkg.com/roziscoding/grammy-rich-messages/src/components.ts` on Deno if you did not add the optional [`components` alias](#deno):
 
 ```tsx
 import {
@@ -223,6 +253,8 @@ The guards — `expectRichText`, `expectBlock`, `expectListItem`, `expectTableRo
 | `grammy-rich-messages/core`       | Functional builders, the `richMessage` root, and the Telegram types |
 | `grammy-rich-messages/components` | TSX components, the `richMessage` root, and narrowing guards        |
 | `grammy-rich-messages/chaining`   | `RichMessage`, `TableBuilder`, and `TableRowBuilder`                |
+
+On Deno, these same specifiers work if you add the optional aliases shown in [Deno setup](#deno). Otherwise, import the matching source modules directly from `denopkg.com`: `src/core.ts`, `src/components.ts`, and `src/chaining.ts`.
 
 Every TSX component has a lower-camel-case builder in `core`. `core` exports a strict `richMessage` that only accepts block values, so invalid children fail at compile time; `components` exports one that also accepts `JSX.Element` children and validates at runtime. Both return the same value.
 

@@ -1,5 +1,5 @@
-// deno-lint-ignore-file no-import-prefix -- grammy pulled directly from lib.deno.dev in the example
-import { Bot } from "https://lib.deno.dev/x/grammy@^1.45/mod.ts";
+// deno-lint-ignore-file no-import-prefix -- grammy pulled directly from denopkg in the example
+import { Bot } from "https://denopkg.com/grammyjs/grammY@v1.45.1/src/mod.ts";
 import {
     Bold,
     Divider,

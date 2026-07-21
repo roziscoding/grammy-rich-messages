@@ -2,7 +2,7 @@ export type {
     Context,
     InputFile,
     NextFunction,
-} from "https://lib.deno.dev/x/grammy@^1.45/mod.ts";
+} from "https://denopkg.com/grammyjs/grammY@v1.45.1/src/mod.ts";
 export type {
     InputMediaAnimation,
     InputMediaAudio,
@@ -35,4 +35,4 @@ export type {
     RichTextTextMention,
     RichTextUrl,
     User,
-} from "https://lib.deno.dev/x/grammy@^1.45/types.ts";
+} from "https://denopkg.com/grammyjs/grammY@v1.45.1/src/types.ts";
