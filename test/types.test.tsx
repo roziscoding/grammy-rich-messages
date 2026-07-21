@@ -66,10 +66,10 @@ function _typeSafetyAssertions(): void {
     void permissiveCaption;
     void incompleteEntity;
 
-    // @ts-expect-error InputMedia fields are closed against misspelled Bot API properties.
     const invalidMedia: InputMediaPhoto = {
         type: "photo",
         media: "id",
+        // @ts-expect-error InputMedia fields are closed against misspelled Bot API properties.
         has_spolier: true,
     };
     void invalidMedia;
