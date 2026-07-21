@@ -3,11 +3,11 @@
 Rich message plugin for the [grammY](https://grammy.dev) Telegram bot framework. Compose [Telegram Bot API rich messages](https://core.telegram.org/bots/api#rich-messages) with typed functions, a fluent builder, TSX, or any combination, then send them with a single `ctx.replyRich(...)`.
 
 - Adds `ctx.replyRich` to grammY through a small middleware; the composition API also works standalone with any Bot API client
-- Built on [`@grammyjs/types`](https://github.com/grammyjs/types) — builders return those exact objects, ready to send with grammY or any Bot API client
+- Built on grammY's own [`grammy/types`](https://grammy.dev) — builders return those exact objects, ready to send with grammY or any Bot API client
 - No React or virtual DOM
 - Compile-time hierarchy checks with functional builders
 - Runtime validation for JavaScript, casts, and TSX composition
-- Covers every rich-message block and rich-text entity in `@grammyjs/types`
+- Covers every rich-message block and rich-text entity in `grammy/types`
 
 ## Installation
 
@@ -235,7 +235,7 @@ Available guards:
 The package has four public entrypoints:
 
 - `grammy-rich-messages` — the grammY plugin: the `richMessages` middleware and `RichMessagesFlavor`
-- `grammy-rich-messages/core` — functional builders and the Telegram types (re-exported from `@grammyjs/types`)
+- `grammy-rich-messages/core` — functional builders and the Telegram types (re-exported from `grammy/types`)
 - `grammy-rich-messages/components` — TSX components and narrowing guards
 - `grammy-rich-messages/fluent` — `RichMessage`, `TableBuilder`, and `TableRowBuilder`
 
@@ -255,7 +255,7 @@ Props use camelCase. Builders immediately produce the Bot API's snake_case field
 
 ### Types
 
-Builders return [`@grammyjs/types`](https://github.com/grammyjs/types) values — `InputRichMessage`, `InputRichBlock`, `RichText`, and friends — carrying a non-enumerable brand used for runtime category checks. The brand disappears in `JSON.stringify` and is structurally assignable to the bare grammY type, so a result passes straight to grammY (or any Bot API client) unchanged. These Telegram types are re-exported from `grammy-rich-messages/core`.
+Builders return `grammy/types` values — `InputRichMessage`, `InputRichBlock`, `RichText`, and friends — carrying a non-enumerable brand used for runtime category checks. The brand disappears in `JSON.stringify` and is structurally assignable to the bare grammY type, so a result passes straight to grammY (or any Bot API client) unchanged. These Telegram types are re-exported from `grammy-rich-messages/core`.
 
 Media builders take a Telegram `InputMedia` payload; its `media` field accepts an upload (grammY's `InputFile`) or a file_id/URL string.
 
